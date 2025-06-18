@@ -202,6 +202,8 @@ const translations = {
 
 ## TODO List
 
+- [ ] Get a demo up and running
+
 ### Features
 - [ ] Multiple file upload support
 - [ ] Additional file format support (OGG, M4A, etc.)
