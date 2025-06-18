@@ -205,7 +205,7 @@ const translations = {
 - [ ] Get a demo up and running
 
 ### Features
-- [ ] Multiple file upload support
+- [ ] Multiple file/recording upload support
 - [ ] Additional file format support (OGG, M4A, etc.)
 - [ ] Contact support integration in error messages
 - [ ] Configurable primary color accent in CSS
