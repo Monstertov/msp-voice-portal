@@ -70,14 +70,14 @@ upload_max_filesize = 10M
 post_max_size = 12M
 
 ; Set maximum number of file uploads
-max_file_uploads = 20
+max_file_uploads = 5
 ```
 
 #### Option 2: .htaccess File (Apache)
 ```apache
 php_value upload_max_filesize 10M
 php_value post_max_size 12M
-php_value max_file_uploads 20
+php_value max_file_uploads 5
 ```
 
 #### Option 3: Runtime Configuration
@@ -85,7 +85,7 @@ Add to your PHP script or use `ini_set()`:
 ```php
 ini_set('upload_max_filesize', '10M');
 ini_set('post_max_size', '12M');
-ini_set('max_file_uploads', '20');
+ini_set('max_file_uploads', '5');
 ```
 
 ### Important Notes
@@ -98,7 +98,7 @@ ini_set('max_file_uploads', '20');
 For most use cases, we recommend:
 - **upload_max_filesize**: 10M (10MB)
 - **post_max_size**: 12M (12MB)
-- **max_file_uploads**: 20
+- **max_file_uploads**: 5
 
 After changing these settings, update the `max_file_size` value in `config.php` to match your `upload_max_filesize` setting.
 
