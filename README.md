@@ -211,8 +211,7 @@ const translations = {
 ### Technical Improvements
 - [ ] Add file format validation for new formats
 - [ ] Implement multi-file upload handling
-- [ ] Add support contact configuration in config.php
-- [ ] Create CSS variable system for theming
+- [ ] Add MSP support contact configuration in config.php
 
 ### Browser Testing
 - [ ] iOS Chrome/Safari testing
