@@ -206,7 +206,7 @@ error_reporting($config['error_handling']['error_reporting']);
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <footer class="text-center text-muted">
-                    <small><span data-i18n="developedBy">Developed by</span> <a href="https://github.com/monstertov" target="_blank" class="text-decoration-none">Monstertov</a></small>
+                    <small><span data-i18n="developedBy">Developed by</span> <a href="https://github.com/monstertov" target="_blank" class="text-decoration-none">Monstertov</a> - <a href="https://github.com/Monstertov/msp-voice-portal" target="_blank" class="text-decoration-none">Support the project</a></small>
                 </footer>
             </div>
         </div>
