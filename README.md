@@ -59,7 +59,7 @@ The application supports the following audio file formats:
 ## PHP Configuration
 
 ### Upload Limits
-The application is configured for a maximum file size of **2MB**. To change this limit, update the following PHP settings:
+The application is configured for a maximum file size of **10MB**. To change this limit, update the following PHP settings:
 
 #### Option 1: PHP Configuration File (php.ini)
 ```ini
