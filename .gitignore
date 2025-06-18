@@ -1,0 +1,33 @@
+# Ignore .htaccess file
+.htaccess
+
+# Ignore uploads directory
+uploads/
+
+# Ignore vendor directory
+vendor/
+
+# Ignore composer files
+composer.lock
+composer.phar
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.sublime-*
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Development scripts and testing
+logs/
+reset.php
+test.php
+
+config.php

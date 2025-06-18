@@ -1,0 +1,26 @@
+* text=auto
+
+# PHP files
+*.php text eol=lf
+
+# JavaScript files
+*.js text eol=lf
+
+# CSS files
+*.css text eol=lf
+
+# HTML files
+*.html text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# JSON files
+*.json text eol=lf
+
+# Graphics
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf 
