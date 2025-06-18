@@ -55,6 +55,7 @@ The application supports the following audio file formats:
 - Composer for dependencies
 - Web server (Apache/Nginx)
 - SMTP server for email functionality
+- The SMTP server and e-mail receiver must be able to handle e-mail attachments of the configured sizes
 
 ## PHP Configuration
 
