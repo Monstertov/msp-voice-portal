@@ -35,16 +35,12 @@ The application supports the following audio file formats:
 - **WAV** - Waveform Audio File Format
   - MIME types: `audio/wav`, `audio/wave`, `audio/x-wav`, `audio/x-pn-wav`, `audio/vnd.wave`
   - File header validation (RIFF header)
-  - Maximum size: 2MB (configurable)
 - **MP3** - MPEG Audio Layer III
   - MIME types: `audio/mpeg`, `application/octet-stream`
-  - Maximum size: 2MB (configurable)
 - **MP4** - MPEG-4 Audio
   - MIME types: `audio/mp4`
-  - Maximum size: 2MB (configurable)
 - **WebM** - Web Media Audio
   - MIME types: `audio/webm`, `video/webm`
-  - Maximum size: 2MB (configurable)
 
 ### File Validation
 - MIME type verification using PHP's `finfo`
