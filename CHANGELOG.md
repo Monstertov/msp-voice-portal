@@ -2,36 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
+## [0.9.0-beta] - 2025-06-18
 
 ### Added
-- Initial release
-
-### Changed
-- None
-
-### Deprecated
-- None
-
-### Removed
-- None
-
-### Fixed
-- None
-
-### Security
-- None
-
-## [1.0.0] - YYYY-MM-DD
-### Added
-- Initial release of MSP Voice Portal
+- Initial public beta release of MSP Voice Portal
 - Multiple input methods (audio recording, file upload, text)
 - Multi-language support (English and Dutch)
 - Secure file handling and validation
 - Email notifications
 - Rate limiting protection
 - CSRF protection
-- Comprehensive error handling 
+- Comprehensive error handling
+
+### Changed
+- N/A
+
+### Deprecated
+- N/A
+
+### Removed
+- N/A
+
+### Fixed
+- N/A
+
+### Security
+- N/A 
