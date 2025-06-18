@@ -224,7 +224,6 @@ function send_email($config, $data, $attachment_path = null) {
         // Recipients
         $mail->setFrom($config['email']['from'], $config['email']['from_name']);
         $mail->addAddress($config['email']['to']);
-        $mail->addReplyTo($data['contactEmail'], $data['companyName']);
 
         // Attach file if exists
         if ($attachment_path && file_exists($attachment_path)) {
