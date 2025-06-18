@@ -52,7 +52,7 @@ The application supports the following audio file formats:
 ## Requirements
 
 - PHP 7.4 or higher
-- Composer for dependencies
+- Composer for dependencies (or installed manually)
 - Web server (Apache/Nginx)
 - SMTP server for email functionality
 - The SMTP server and e-mail receiver must be able to handle e-mail attachments of the configured sizes
