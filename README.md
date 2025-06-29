@@ -27,6 +27,22 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 - Comprehensive error handling
 - Easy CSS theming
 
+## Readme Index
+
+- [Supported File Types](#supported-file-types)
+- [Requirements](#requirements)
+- [PHP Configuration](#php-configuration)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Customer Usage](#customer-usage)
+- [Contributing](#contributing)
+- [Multi-language Support](#multi-language-support)
+- [Changelog](CHANGELOG.md)
+- [TODO List](#todo-list)
+- [Author](#author)
+- [License](#license)
+
+
 ## Supported File Types
 
 The application supports the following audio file formats:
