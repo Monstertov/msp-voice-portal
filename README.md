@@ -254,11 +254,19 @@ const translations = {
 - [x] Contact support integration in error messages
 - [x] Clickable mailto link for support contact in disclaimer
 - [ ] Configurable primary color accent in CSS
+- [ ] Remember company name/email from previous submissions
+- [ ] Play back recordings before submission
+- [ ] Drag & drop upload
+- [ ] ElevenLabs integration
+
+
 
 ### Technical Improvements
+- [ ] Configurable max recording duration with warnings
 - [x] Add file format validation for new formats
-- [ ] Implement multi-file upload handling
+- [ ] Implement multi-file upload handling (split in multiple e-mails)
 - [x] Add MSP support contact configuration in config.php
+- [ ] File compression
 
 ### Browser Testing
 - [ ] iOS Chrome/Safari testing
