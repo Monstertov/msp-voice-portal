@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.1-beta] - 2025-06-30
+
+### Added
+- Support for additional audio formats:
+  - **OGG** (.ogg) - Ogg Vorbis audio format
+  - **AAC** (.aac) - Advanced Audio Coding format
+  - **M4A** (.m4a) - MPEG-4 Audio standalone format
+- Enhanced file validation with header checking for new formats
+- Updated file input accept attributes to include new formats
+- Updated error messages to reflect new supported formats
+
+### Changed
+- Updated configuration to include new MIME types and extensions
+- Enhanced file validation logic to support OGG, AAC, and M4A headers
+- Updated documentation to reflect new supported formats
+
 ## [0.9.0-beta] - 2025-06-18
 
 ### Added

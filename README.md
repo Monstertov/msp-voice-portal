@@ -41,10 +41,19 @@ The application supports the following audio file formats:
   - MIME types: `audio/mp4`
 - **WebM** - Web Media Audio
   - MIME types: `audio/webm`, `video/webm`
+- **OGG** - Ogg Vorbis Audio
+  - MIME types: `audio/ogg`
+  - File header validation (OggS header)
+- **AAC** - Advanced Audio Coding
+  - MIME types: `audio/aac`, `audio/aacp`
+  - File header validation (ADTS header)
+- **M4A** - MPEG-4 Audio (standalone)
+  - MIME types: `audio/x-m4a`, `audio/mp4a-latm`
+  - File header validation (ftyp header)
 
 ### File Validation
 - MIME type verification using PHP's `finfo`
-- File header validation for WAV files
+- File header validation for WAV, OGG, M4A, and AAC files
 - File extension fallback validation
 - Size limit enforcement
 - Secure file naming with random prefixes

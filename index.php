@@ -130,8 +130,8 @@ error_reporting($config['error_handling']['error_reporting']);
                             <!-- File Upload Section -->
                             <div id="uploadSection" class="input-section">
                                 <label for="audioFile" class="form-label" data-i18n="uploadAudioFile">Upload Audio File</label>
-                                <input type="file" class="form-control" id="audioFile" name="audioFile" accept=".mp3,.wav,.mp4,.webm,audio/mpeg,audio/wav,audio/mp4,audio/webm">
-                                <div class="form-text" data-i18n="supportedFormats">Supported formats: MP3, WAV, MP4, WebM</div>
+                                <input type="file" class="form-control" id="audioFile" name="audioFile" accept=".mp3,.wav,.mp4,.webm,.ogg,.aac,.m4a,audio/mpeg,audio/wav,audio/mp4,audio/webm,audio/ogg,audio/aac,audio/x-m4a">
+                                <div class="form-text" data-i18n="supportedFormats">Supported formats: MP3, WAV, MP4, WebM, OGG, AAC, M4A</div>
                             </div>
 
                             <!-- Text Input Section -->

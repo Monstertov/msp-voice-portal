@@ -140,7 +140,12 @@ function validate_file($file) {
         'audio/x-pn-wav' => 'wav', // Additional WAV MIME type
         'audio/vnd.wave' => 'wav', // Another WAV MIME type
         'audio/wave; codecs="1"' => 'wav', // WAV with codec specification
-        'audio/wave; codecs=1' => 'wav' // WAV with codec specification (no quotes)
+        'audio/wave; codecs=1' => 'wav', // WAV with codec specification (no quotes)
+        'audio/ogg' => 'ogg', // OGG Vorbis
+        'audio/aac' => 'aac', // AAC
+        'audio/x-m4a' => 'm4a', // M4A
+        'audio/mp4a-latm' => 'm4a', // Alternative M4A MIME type
+        'audio/aacp' => 'aac' // Alternative AAC MIME type
     ];
     
     // Log file validation attempt
@@ -175,8 +180,43 @@ function validate_file($file) {
         log_error("WAV file with invalid header", ['header' => bin2hex($file_header)]);
     }
     
+    // Special handling for OGG files - check file header
+    if ($extension === 'ogg') {
+        // Read first 4 bytes to check for OGG header
+        $file_header = file_get_contents($file['tmp_name'], false, null, 0, 4);
+        if ($file_header === 'OggS') {
+            log_error("OGG file detected by header", ['header' => bin2hex($file_header)]);
+            return true;
+        }
+        log_error("OGG file with invalid header", ['header' => bin2hex($file_header)]);
+    }
+    
+    // Special handling for M4A files - check file header
+    if ($extension === 'm4a') {
+        // Read first 8 bytes to check for M4A header (should contain 'ftyp')
+        $file_header = file_get_contents($file['tmp_name'], false, null, 0, 8);
+        if (strpos($file_header, 'ftyp') !== false) {
+            log_error("M4A file detected by header", ['header' => bin2hex($file_header)]);
+            return true;
+        }
+        log_error("M4A file with invalid header", ['header' => bin2hex($file_header)]);
+    }
+    
+    // Special handling for AAC files - check file header
+    if ($extension === 'aac') {
+        // AAC files can have different headers, check for ADTS header
+        $file_header = file_get_contents($file['tmp_name'], false, null, 0, 2);
+        $header_hex = bin2hex($file_header);
+        // Check for ADTS sync word (0xFFF)
+        if (substr($header_hex, 0, 3) === 'fff') {
+            log_error("AAC file detected by ADTS header", ['header' => $header_hex]);
+            return true;
+        }
+        log_error("AAC file with invalid header", ['header' => $header_hex]);
+    }
+    
     // If MIME type not found, check file extension as fallback
-    $valid_extensions = ['mp3', 'wav', 'mp4', 'webm'];
+    $valid_extensions = ['mp3', 'wav', 'mp4', 'webm', 'ogg', 'aac', 'm4a'];
     
     log_error("Checking file extension", ['extension' => $extension]);
     
@@ -324,7 +364,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'en' => [
                 'company_email_required' => 'Company name and contact email are required.',
                 'invalid_email' => 'Invalid email address.',
-                'invalid_file_type' => 'Invalid file type. Allowed types are: MP3, WAV, MP4, WebM. Detected type: ',
+                'invalid_file_type' => 'Invalid file type. Allowed types are: MP3, WAV, MP4, WebM, OGG, AAC, M4A. Detected type: ',
                 'file_size_exceeded' => 'File size exceeds the maximum limit.',
                 'file_save_failed' => 'Failed to save the uploaded file.',
                 'audio_file_required' => 'An audio file is required for this recording method.',
@@ -336,7 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'nl' => [
                 'company_email_required' => 'Bedrijfsnaam en contact e-mail zijn verplicht.',
                 'invalid_email' => 'Ongeldig e-mailadres.',
-                'invalid_file_type' => 'Ongeldig bestandstype. Toegestane types zijn: MP3, WAV, MP4, WebM. Gedetecteerd type: ',
+                'invalid_file_type' => 'Ongeldig bestandstype. Toegestane types zijn: MP3, WAV, MP4, WebM, OGG, AAC, M4A. Gedetecteerd type: ',
                 'file_size_exceeded' => 'Bestandsgrootte overschrijdt de maximale limiet.',
                 'file_save_failed' => 'Het opslaan van het geüploade bestand is mislukt.',
                 'audio_file_required' => 'Een audiobestand is vereist voor deze opnamemethode.',
@@ -529,6 +569,8 @@ exit;
 
 // Add file content validation
 function validateFileContent($file_path) {
+    global $config;
+    
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $file_path);
     finfo_close($finfo);
@@ -539,14 +581,22 @@ function validateFileContent($file_path) {
     }
     
     // Check file headers
-    $file_header = file_get_contents($file_path, false, null, 0, 4);
+    $file_header = file_get_contents($file_path, false, null, 0, 8);
     $valid_headers = [
         'audio/mpeg' => "\xFF\xFB",
         'audio/wav' => "RIFF",
         'audio/mp4' => "ftyp",
-        'audio/webm' => "\x1A\x45\xDF\xA3"
+        'audio/webm' => "\x1A\x45\xDF\xA3",
+        'audio/ogg' => "OggS",
+        'audio/aac' => "\xFF\xF1", // ADTS AAC
+        'audio/x-m4a' => "ftyp"
     ];
     
-    return isset($valid_headers[$mime_type]) && 
-           strpos($file_header, $valid_headers[$mime_type]) === 0;
+    foreach ($valid_headers as $mime => $header) {
+        if ($mime_type === $mime && strpos($file_header, $header) === 0) {
+            return true;
+        }
+    }
+    
+    return false;
 } 

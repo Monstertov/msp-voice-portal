@@ -29,5 +29,7 @@ Thumbs.db
 logs/
 reset.php
 test.php
+tests/
+phpunit.xml
 
 config.php

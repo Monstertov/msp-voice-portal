@@ -79,10 +79,13 @@ return [
             'audio/x-wav',
             'audio/mp4',
             'audio/webm',
-            'video/webm'
+            'video/webm',
+            'audio/ogg',
+            'audio/aac',
+            'audio/x-m4a'
         ],
         'max_file_size' => 10 * 1024 * 1024, // 10MB
-        'allowed_extensions' => ['mp3', 'wav', 'mp4', 'webm']
+        'allowed_extensions' => ['mp3', 'wav', 'mp4', 'webm', 'ogg', 'aac', 'm4a']
     ],
 
     // Error Handling
