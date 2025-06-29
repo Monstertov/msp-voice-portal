@@ -502,19 +502,29 @@ input[type="file"]::file-selector-button:hover {
 
 /* Disclaimer and Footer Styles */
 .disclaimer {
-    padding: 1rem;
-    background-color: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
 }
 
 .disclaimer i {
-    color: var(--primary-color);
     margin-right: 0.5rem;
 }
 
 .disclaimer small {
-    color: var(--text-secondary) !important;
+    display: block;
+    color: var(--text-secondary);
+}
+
+.disclaimer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.disclaimer a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
 }
 
 footer {
@@ -627,4 +637,58 @@ footer a:hover {
         justify-content: flex-start;
         padding: 1rem 1rem;
     }
+}
+
+/* Drag & Drop Styles */
+.card-body {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.card-body.drag-over {
+    background-color: rgba(114, 137, 218, 0.1);
+    border: 2px dashed var(--primary-color);
+    border-radius: 12px;
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(114, 137, 218, 0.3);
+}
+
+.card-body.drag-over::before {
+    content: attr(data-drop-text);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    z-index: 10;
+    pointer-events: none;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.card-body.drag-over * {
+    pointer-events: none;
+}
+
+.card-body.drag-over::before {
+    pointer-events: none;
 } 

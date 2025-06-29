@@ -253,12 +253,11 @@ const translations = {
 - [x] Additional file format support (OGG, M4A, etc.)
 - [x] Contact support integration in error messages
 - [x] Clickable mailto link for support contact in disclaimer
+- [x] Drag & drop upload
 - [ ] Configurable primary color accent in CSS
 - [ ] Remember company name/email from previous submissions
 - [ ] Play back recordings before submission
-- [ ] Drag & drop upload
 - [ ] ElevenLabs integration
-
 
 
 ### Technical Improvements

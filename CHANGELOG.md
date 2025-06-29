@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.3-beta] - 2025-06-30
+
+### Added
+- Drag & drop file upload functionality
+
+### Changed
+- Enhanced user experience with intuitive drag & drop interface
+- Improved file upload workflow with automatic method selection
+- Minor bug fixes
+
 ## [0.9.2-beta] - 2025-06-30
 
 ### Added

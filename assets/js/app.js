@@ -536,4 +536,123 @@ document.addEventListener('DOMContentLoaded', function() {
             mediaRecorder.stream.getTracks().forEach(track => track.stop());
         }
     });
+
+    // Drag & Drop functionality
+    const cardBody = document.querySelector('.card-body');
+    let dragCounter = 0;
+    let dragTimeout = null;
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        cardBody.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        cardBody.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        cardBody.addEventListener(eventName, unhighlight, false);
+    });
+
+    // Handle dropped files
+    cardBody.addEventListener('drop', handleDrop, false);
+
+    // Add global drag end listener to ensure cleanup
+    document.addEventListener('dragend', unhighlight, false);
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function highlight(e) {
+        e.preventDefault();
+        dragCounter++;
+        
+        // Clear any existing timeout
+        if (dragTimeout) {
+            clearTimeout(dragTimeout);
+            dragTimeout = null;
+        }
+        
+        if (dragCounter === 1) {
+            cardBody.classList.add('drag-over');
+            // Always use current translation
+            cardBody.setAttribute('data-drop-text', t('dropAudioFilesHere'));
+        }
+    }
+
+    function unhighlight(e) {
+        e.preventDefault();
+        dragCounter--;
+        
+        // Clear any existing timeout
+        if (dragTimeout) {
+            clearTimeout(dragTimeout);
+        }
+        
+        if (dragCounter <= 0) {
+            dragCounter = 0;
+            cardBody.classList.remove('drag-over');
+        } else {
+            // Set a timeout to force clear the drag state if events get stuck
+            dragTimeout = setTimeout(() => {
+                dragCounter = 0;
+                cardBody.classList.remove('drag-over');
+                dragTimeout = null;
+            }, 100);
+        }
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            // Filter for audio files only
+            const audioFiles = Array.from(files).filter(file => {
+                const validTypes = [
+                    'audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/webm', 
+                    'audio/ogg', 'audio/aac', 'audio/x-m4a', 'audio/mp3'
+                ];
+                return validTypes.includes(file.type) || 
+                       file.name.match(/\.(mp3|wav|mp4|webm|ogg|aac|m4a)$/i);
+            });
+
+            if (audioFiles.length > 0) {
+                // Switch to upload method
+                const uploadRadio = document.getElementById('uploadAudio');
+                if (uploadRadio) {
+                    uploadRadio.checked = true;
+                    uploadRadio.dispatchEvent(new Event('change'));
+                }
+
+                // Set the files to the file input
+                const fileInput = document.getElementById('audioFile');
+                if (fileInput) {
+                    // Create a new DataTransfer object
+                    const dataTransfer = new DataTransfer();
+                    audioFiles.forEach(file => dataTransfer.items.add(file));
+                    fileInput.files = dataTransfer.files;
+                    
+                    // Trigger change event to update any listeners
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+
+                // Show success notification
+                const fileNames = audioFiles.map(f => f.name).join(', ');
+                // Get current language from active button
+                const activeLangButton = document.querySelector('.language-switcher button.active');
+                const currentLang = activeLangButton ? activeLangButton.dataset.lang : 'en';
+                showNotification(`${t('filesUploaded', currentLang)}: ${fileNames}`, 'info');
+            } else {
+                const activeLangButton = document.querySelector('.language-switcher button.active');
+                const currentLang = activeLangButton ? activeLangButton.dataset.lang : 'en';
+                showNotification(t('dropAudioFilesOnly', currentLang), 'error');
+            }
+        }
+    }
 }); 

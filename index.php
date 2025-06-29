@@ -84,9 +84,6 @@ error_reporting($config['error_handling']['error_reporting']);
                         </div>
 
                         <form id="recordingForm" action="process.php" method="POST" enctype="multipart/form-data">
-                            <div class="mb-4">
-                                <small class="text-muted" data-i18n="requiredFields">Required fields</small>
-                            </div>
                             <?php if ($config['csrf']['enabled']): ?>
                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION[$config['csrf']['token_name']]; ?>">
                             <?php endif; ?>

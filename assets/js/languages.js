@@ -17,6 +17,7 @@ const translations = {
         contactPhone: "Contact Phone",
         notes: "Notes",
         severityLevel: "Severity Level",
+        requiredFields: "Required fields",
         
         // Severity Levels
         normal: "Normal",
@@ -46,6 +47,8 @@ const translations = {
         // Messages
         businessHoursNote: "Please note that these requests will only be handled between business hours.",
         forAssistanceContact: "For assistance, contact",
+        dragDropHint: "💡 Tip: You can drag and drop audio files anywhere on this form",
+        dropAudioFilesHere: "Drop audio files here",
         developedBy: "Developed by",
         
         // Notifications
@@ -64,6 +67,8 @@ const translations = {
         sending: "Sending...",
         errorSending: "An error occurred while sending your submission. Please try again.",
         submissionSuccess: "Your submission has been received successfully.",
+        filesUploaded: "Files uploaded",
+        dropAudioFilesOnly: "Please drop audio files only (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
         submissionSuccess: "Your submission has been received successfully."
     },
     nl: {
@@ -84,6 +89,7 @@ const translations = {
         contactPhone: "Contact Telefoon",
         notes: "Notities",
         severityLevel: "Prioriteitsniveau",
+        requiredFields: "Vereiste velden",
         
         // Severity Levels
         normal: "Normaal",
@@ -113,24 +119,28 @@ const translations = {
         // Messages
         businessHoursNote: "Let op: deze aanvragen worden alleen tijdens kantooruren behandeld.",
         forAssistanceContact: "Voor hulp, stuur een mail naar",
+        dragDropHint: "💡 Tip: U kunt audiobestanden plaatsen op deze vorm",
+        dropAudioFilesHere: "Plaats audiobestanden hier",
         developedBy: "Ontwikkeld door",
         
         // Notifications
-        recordingNotSupported: "Uw browser ondersteunt geen audio-opname. Gebruik een moderne browser of probeer de uploadoptie.",
+        recordingNotSupported: "Uw browser ondersteunt geen audio-opname. Gebruik een moderne browser of probeer de upload-optie.",
         httpsRequired: "Audio-opname vereist een beveiligde verbinding (HTTPS) of localhost.",
-        allowMicrophone: "Sta microfoontoegang toe in uw browserinstellingen. Klik op het camera/microfoonpictogram in de adresbalk om toestemming te geven.",
+        allowMicrophone: "Sta microfoon-toegang toe in uw browser-instellingen. Klik op het camera/microfoon-pictogram in de adresbalk om toestemming te verlenen.",
         noMicrophone: "Geen microfoon gevonden. Zorg ervoor dat uw apparaat een microfoon heeft.",
-        microphoneBusy: "Uw microfoon is bezet of werkt niet. Probeer het opnieuw of gebruik de uploadoptie.",
+        microphoneBusy: "Uw microfoon is bezet of werkt niet. Probeer het opnieuw of gebruik de upload-optie.",
         recordingError: "Fout bij het verwerken van de opname. Probeer het opnieuw.",
-        microphoneError: "Fout bij het openen van de microfoon. Probeer de uploadoptie.",
+        microphoneError: "Fout bij toegang tot microfoon. Probeer de upload-optie.",
         invalidEmail: "Voer een geldig e-mailadres in.",
         invalidPhone: "Voer een geldig telefoonnummer in (alleen cijfers en + symbool toegestaan).",
         recordingRequired: "Maak eerst een opname voordat u verstuurt.",
-        fileRequired: "Selecteer een audiobestand om te uploaden.",
+        fileRequired: "Selecteer eerst een audiobestand voordat u verstuurt.",
         textRequired: "Voer eerst tekst in voordat u verstuurt.",
         sending: "Versturen...",
         errorSending: "Er is een fout opgetreden bij het versturen van uw aanvraag. Probeer het opnieuw.",
-        submissionSuccess: "Uw aanvraag is succesvol ontvangen."
+        submissionSuccess: "Uw aanvraag is succesvol ontvangen.",
+        filesUploaded: "Bestanden geüpload",
+        dropAudioFilesOnly: "Plaats alleen audiobestanden (MP3, WAV, MP4, WebM, OGG, AAC, M4A)"
     }
 };
 
@@ -156,6 +166,12 @@ function updateTranslations(lang) {
         const key = element.getAttribute('data-i18n-placeholder');
         element.placeholder = t(key, lang);
     });
+    
+    // Update drag overlay text if currently active
+    const cardBody = document.querySelector('.card-body');
+    if (cardBody && cardBody.classList.contains('drag-over')) {
+        cardBody.setAttribute('data-drop-text', t('dropAudioFilesHere', lang));
+    }
 }
 
 // Add language selector to the page
