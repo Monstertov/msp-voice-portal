@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.2-beta] - 2025-06-30
+
+### Added
+- Support email dynamically loaded from configuration using PHP
+- Mailto functionality works in both English and Dutch languages
+
+### Changed
+- Updated support contact display to show actual email address instead of generic "support" text
+
 ## [0.9.1-beta] - 2025-06-30
 
 ### Added

@@ -61,7 +61,7 @@ error_reporting($config['error_handling']['error_reporting']);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
 </head>
-<body>
+<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>">
     <div class="container py-2">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -189,7 +189,17 @@ error_reporting($config['error_handling']['error_reporting']);
 
                             <div class="text-center">
                                 <div class="disclaimer text-muted mb-3">
-                                    <small><i class="fas fa-info-circle"></i> <span data-i18n="businessHoursNote">Please note that these requests will only be handled between business hours.</span></small>
+                                    <small>
+                                        <i class="fas fa-info-circle"></i>
+                                        <span data-i18n="businessHoursNote">Please note that these requests will only be handled between business hours.</span>
+                                    </small>
+                                    <br>
+                                    <small>
+                                        <i class="fas fa-envelope"></i>
+                                        <span>
+                                            <span data-i18n="forAssistanceContact">For assistance, contact</span> <a href="mailto:<?php echo htmlspecialchars($config['support']['email']); ?>"><?php echo htmlspecialchars($config['support']['email']); ?></a>
+                                        </span>
+                                    </small>
                                 </div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-paper-plane"></i> <span data-i18n="submit">Submit</span>

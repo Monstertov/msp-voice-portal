@@ -213,13 +213,14 @@ const translations = {
 ### Features
 - [ ] Multiple file/recording upload support
 - [x] Additional file format support (OGG, M4A, etc.)
-- [ ] Contact support integration in error messages
+- [x] Contact support integration in error messages
+- [x] Clickable mailto link for support contact in disclaimer
 - [ ] Configurable primary color accent in CSS
 
 ### Technical Improvements
 - [x] Add file format validation for new formats
 - [ ] Implement multi-file upload handling
-- [ ] Add MSP support contact configuration in config.php
+- [x] Add MSP support contact configuration in config.php
 
 ### Browser Testing
 - [ ] iOS Chrome/Safari testing

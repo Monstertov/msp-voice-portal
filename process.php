@@ -362,28 +362,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Define translations
         $translations = [
             'en' => [
-                'company_email_required' => 'Company name and contact email are required.',
-                'invalid_email' => 'Invalid email address.',
+                'company_email_required' => 'Company name and contact email are required. For assistance, contact ' . $config['support']['email'],
+                'invalid_email' => 'Invalid email address. For assistance, contact ' . $config['support']['email'],
                 'invalid_file_type' => 'Invalid file type. Allowed types are: MP3, WAV, MP4, WebM, OGG, AAC, M4A. Detected type: ',
-                'file_size_exceeded' => 'File size exceeds the maximum limit.',
-                'file_save_failed' => 'Failed to save the uploaded file.',
-                'audio_file_required' => 'An audio file is required for this recording method.',
-                'upload_error' => 'File upload failed. Please try again or use a smaller file.',
-                'upload_size_error' => 'File is too large. Maximum size is 10MB. Please use a smaller file.',
+                'file_size_exceeded' => 'File size exceeds the maximum limit. For assistance, contact ' . $config['support']['email'],
+                'file_save_failed' => 'Failed to save the uploaded file. For assistance, contact ' . $config['support']['email'],
+                'audio_file_required' => 'An audio file is required for this recording method. For assistance, contact ' . $config['support']['email'],
+                'upload_error' => 'File upload failed. Please try again or use a smaller file. For assistance, contact ' . $config['support']['email'],
+                'upload_size_error' => 'File is too large. Maximum size is 10MB. Please use a smaller file. For assistance, contact ' . $config['support']['email'],
                 'submission_success' => 'Your submission has been received successfully.',
-                'submission_failed' => 'Failed to send the submission. Please try again later.'
+                'submission_failed' => 'Failed to send the submission. Please try again later. For assistance, contact ' . $config['support']['email']
             ],
             'nl' => [
-                'company_email_required' => 'Bedrijfsnaam en contact e-mail zijn verplicht.',
-                'invalid_email' => 'Ongeldig e-mailadres.',
+                'company_email_required' => 'Bedrijfsnaam en contact e-mail zijn verplicht. Voor hulp, neem contact op met ' . $config['support']['email'],
+                'invalid_email' => 'Ongeldig e-mailadres. Voor hulp, neem contact op met ' . $config['support']['email'],
                 'invalid_file_type' => 'Ongeldig bestandstype. Toegestane types zijn: MP3, WAV, MP4, WebM, OGG, AAC, M4A. Gedetecteerd type: ',
-                'file_size_exceeded' => 'Bestandsgrootte overschrijdt de maximale limiet.',
-                'file_save_failed' => 'Het opslaan van het geüploade bestand is mislukt.',
-                'audio_file_required' => 'Een audiobestand is vereist voor deze opnamemethode.',
-                'upload_error' => 'Bestandsupload mislukt. Probeer het opnieuw of gebruik een kleiner bestand.',
-                'upload_size_error' => 'Bestand is te groot. Maximale grootte is 10MB. Gebruik een kleiner bestand.',
+                'file_size_exceeded' => 'Bestandsgrootte overschrijdt de maximale limiet. Voor hulp, neem contact op met ' . $config['support']['email'],
+                'file_save_failed' => 'Het opslaan van het geüploade bestand is mislukt. Voor hulp, neem contact op met ' . $config['support']['email'],
+                'audio_file_required' => 'Een audiobestand is vereist voor deze opnamemethode. Voor hulp, neem contact op met ' . $config['support']['email'],
+                'upload_error' => 'Bestandsupload mislukt. Probeer het opnieuw of gebruik een kleiner bestand. Voor hulp, neem contact op met ' . $config['support']['email'],
+                'upload_size_error' => 'Bestand is te groot. Maximale grootte is 10MB. Gebruik een kleiner bestand. Voor hulp, neem contact op met ' . $config['support']['email'],
                 'submission_success' => 'Uw inzending is succesvol ontvangen.',
-                'submission_failed' => 'Het verzenden van de inzending is mislukt. Probeer het later opnieuw.'
+                'submission_failed' => 'Het verzenden van de inzending is mislukt. Probeer het later opnieuw. Voor hulp, neem contact op met ' . $config['support']['email']
             ]
         ];
 

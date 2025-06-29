@@ -45,6 +45,7 @@ const translations = {
         
         // Messages
         businessHoursNote: "Please note that these requests will only be handled between business hours.",
+        forAssistanceContact: "For assistance, contact",
         developedBy: "Developed by",
         
         // Notifications
@@ -111,6 +112,7 @@ const translations = {
         
         // Messages
         businessHoursNote: "Let op: deze aanvragen worden alleen tijdens kantooruren behandeld.",
+        forAssistanceContact: "Voor hulp, stuur een mail naar",
         developedBy: "Ontwikkeld door",
         
         // Notifications

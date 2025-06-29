@@ -25,6 +25,12 @@ return [
     'max_file_size' => 10 * 1024 * 1024, // 10MB
     'default_language' => 'en',
 
+    // MSP Support Contact Configuration
+    'support' => [
+        'email' => 'rob@monstertov.nl', // MSP support contact email
+        'name' => 'MSP Support Team' // MSP support team name
+    ],
+
     // Security Headers
     'security_headers' => [
         'content_security_policy' => [
