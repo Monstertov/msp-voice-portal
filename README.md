@@ -21,7 +21,7 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 - Multiple input methods (audio recording, file upload, text)
 - Secure file handling and validation
 - Email notifications
-- Multi-language support ([View Supported Languages](#multi-language-support))
+- Multi-language support
 - User-friendly interface
 - Mobile-responsive design
 - Configurable security settings
@@ -32,11 +32,8 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 
 ## Readme Index
 
-- [Supported File Types](#supported-file-types)
-- [Requirements](#requirements)
-- [PHP Configuration](#php-configuration)
 - [Installation](#installation)
-- [Configuration](#configuration)
+- [Supported File Types](#supported-file-types)
 - [Customer Usage](#customer-usage)
 - [Contributing](#contributing)
 - [Multi-language Support](#multi-language-support)
@@ -45,6 +42,9 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 - [Author](#author)
 - [License](#license)
 
+## Installation
+
+For detailed installation instructions, please refer to the [INSTALL.md](INSTALL.md) guide.
 
 ## Supported File Types
 
@@ -76,101 +76,6 @@ The application supports the following audio file formats:
 - File extension fallback validation
 - Size limit enforcement
 - Secure file naming with random prefixes
-
-## Requirements
-
-- PHP 7.4 or higher
-- Composer for dependencies (or installed manually)
-- Web server (Apache/Nginx)
-- SMTP server for email functionality
-- The SMTP server and e-mail receiver must be able to handle e-mail attachments of the configured sizes
-
-## PHP Configuration
-
-### Upload Limits
-The application is configured for a maximum file size of **10MB**. To change this limit, update the following PHP settings:
-
-#### Option 1: PHP Configuration File (php.ini)
-```ini
-; Set maximum file upload size
-upload_max_filesize = 10M
-
-; Set maximum POST data size (should be larger than upload_max_filesize)
-post_max_size = 12M
-
-; Set maximum number of file uploads
-max_file_uploads = 5
-```
-
-#### Option 2: .htaccess File (Apache)
-```apache
-php_value upload_max_filesize 10M
-php_value post_max_size 12M
-php_value max_file_uploads 5
-```
-
-#### Option 3: Runtime Configuration
-Add to your PHP script or use `ini_set()`:
-```php
-ini_set('upload_max_filesize', '10M');
-ini_set('post_max_size', '12M');
-ini_set('max_file_uploads', '5');
-```
-
-### Important Notes
-- `post_max_size` should always be larger than `upload_max_filesize`
-- Changes to `php.ini` require a web server restart
-- `.htaccess` changes take effect immediately
-- Runtime configuration must be set before any file upload processing
-
-### Recommended Settings
-For most use cases, we recommend:
-- **upload_max_filesize**: 10M (10MB)
-- **post_max_size**: 12M (12MB)
-- **max_file_uploads**: 5
-
-After changing these settings, update the `max_file_size` value in `config.php` to match your `upload_max_filesize` setting.
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone [repository-url]
-cd [repository-name]
-```
-
-2. Install dependencies:
-```bash
-composer install
-```
-
-3. Configure the application:
-   - Copy `config.example.php` to `config.php`
-   - Update the configuration settings in `config.php` with your own values
-
-4. Set up the upload directory:
-```bash
-mkdir uploads
-# Set appropriate permissions for your web server user
-# Example for Apache (www-data):
-# chmod 755 uploads
-# chown www-data:www-data uploads
-```
-
-5. Configure your web server to point to the project directory
-
-## Configuration
-
-The `config.php` file contains all configurable options. **Do not commit your real `config.php` to version control.**
-
-- Email settings (SMTP)
-- Security headers
-- File upload settings (including `max_file_size`)
-- CSRF protection
-- Rate limiting
-- Error handling
-
-**Important**: The `max_file_size` setting in `config.php` should match your PHP `upload_max_filesize` setting. See [PHP Configuration](#php-configuration) for details on setting upload limits.
 
 ## Customer Usage
 
@@ -220,7 +125,7 @@ Example language addition:
 const translations = {
     'fr': {
         'submit': 'Soumettre',
-        'recordAudio': 'Enregistrer l\'audio',
+        'recordAudio': 'Enregistrer l'audio',
         // ... more translations
     }
 };
