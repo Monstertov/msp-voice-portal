@@ -60,13 +60,8 @@ error_reporting($config['error_handling']['error_reporting']);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: <?php echo htmlspecialchars($config['primary_color']); ?>;
-        }
-    </style>
 </head>
-<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>">
+<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>" style="--primary-color: <?php echo htmlspecialchars($config['primary_color']); ?>; --primary-hover: <?php echo htmlspecialchars($config['primary_hover']); ?>;">
     <div class="container py-2">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -118,15 +113,16 @@ error_reporting($config['error_handling']['error_reporting']);
 
                             <!-- Audio Recording Section -->
                             <div id="recordingSection" class="input-section active">
-                                <button type="button" class="btn btn-primary record-button" id="recordButton">
-                                    <i class="fas fa-microphone"></i> <span data-i18n="startRecording">Start Recording</span>
-                                </button>
-                                <div class="recording-controls">
-                                    <div class="waveform" id="waveform"></div>
-                                    <button type="button" class="btn btn-danger" id="stopButton">
-                                        <i class="fas fa-stop"></i> <span data-i18n="stopRecording">Stop Recording</span>
+                                <div class="recording-controls d-flex align-items-center gap-2">
+                                    <button type="button" id="startRecording" class="btn btn-primary record-button">
+                                        <i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">Start Recording</span>
                                     </button>
+                                    <button type="button" id="deleteRecording" class="btn btn-danger d-none ms-2">
+                                        <i class="fas fa-trash"></i> <span id="deleteButtonText" data-i18n="deleteRecording">Delete Recording</span>
+                                    </button>
+                                    <audio id="audioPlayback" controls class="ms-2 hidden"></audio>
                                 </div>
+                                <div class="waveform" id="waveform"></div>
                             </div>
 
                             <!-- File Upload Section -->
@@ -143,18 +139,18 @@ error_reporting($config['error_handling']['error_reporting']);
                             </div>
 
                             <div class="mb-4">
-                                <label for="companyName" class="form-label" data-i18n="companyName">Company Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="companyName" name="companyName" required data-i18n-placeholder="companyNamePlaceholder">
+                                <label for="companyName" class="form-label" data-i18n="companyName">Company Name</label>
+                                <input type="text" class="form-control" id="companyName" name="companyName" required value="<?php echo isset($_SESSION['company_name']) ? htmlspecialchars($_SESSION['company_name']) : ''; ?>" data-i18n-placeholder="companyNamePlaceholder">
                             </div>
 
                             <div class="mb-4">
-                                <label for="contactEmail" class="form-label" data-i18n="contactEmail">Contact Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="contactEmail" name="contactEmail" required data-i18n-placeholder="emailPlaceholder">
+                                <label for="contactEmail" class="form-label" data-i18n="contactEmail">Contact Email</label>
+                                <input type="email" class="form-control" id="contactEmail" name="contactEmail" required value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>" data-i18n-placeholder="emailPlaceholder">
                             </div>
 
                             <div class="mb-4">
                                 <label for="contactPhone" class="form-label" data-i18n="contactPhone">Contact Phone <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" id="contactPhone" name="contactPhone" required data-i18n-placeholder="phonePlaceholder">
+                                <input type="tel" class="form-control" id="contactPhone" name="contactPhone" required data-i18n-placeholder="phonePlaceholder" value="<?php echo isset($_SESSION['contact_phone']) ? htmlspecialchars($_SESSION['contact_phone']) : ''; ?>">
                             </div>
 
                             <div class="mb-4">

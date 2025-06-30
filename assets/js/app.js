@@ -1,24 +1,44 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('recordingForm');
-    const recordButton = document.getElementById('recordButton');
-    const stopButton = document.getElementById('stopButton');
+    const recordButton = document.getElementById('startRecording');
     const recordingSection = document.getElementById('recordingSection');
     const uploadSection = document.getElementById('uploadSection');
     const textSection = document.getElementById('textSection');
     const textContent = document.getElementById('textContent');
     const contactPhone = document.getElementById('contactPhone');
     const audioFile = document.getElementById('audioFile');
+    const submitButton = form.querySelector('button[type="submit"]');
     let mediaRecorder;
     let audioChunks = [];
     let hasRecording = false;
     let recordingStartTime;
     let recordingDuration = 0;
     let recordingTimer;
+    let recordedAudioBlob = null;
+
+    // Force visibility of record button
+    function ensureRecordButtonVisibility() {
+        if (recordButton) {
+            recordButton.style.display = 'inline-block !important';
+            recordButton.classList.remove('d-none');
+            recordButton.setAttribute('style', 'display: inline-block !important; visibility: visible !important;');
+        }
+        
+        if (recordingSection) {
+            recordingSection.classList.add('active');
+            recordingSection.style.display = 'block !important';
+            recordingSection.style.opacity = '1 !important';
+            recordingSection.style.height = 'auto !important';
+        }
+    }
+
+    // Call visibility function immediately and on page load
+    ensureRecordButtonVisibility();
+    window.addEventListener('load', ensureRecordButtonVisibility);
 
     // Validate that all required elements exist
-    if (!form || !recordButton || !stopButton || !recordingSection || 
+    if (!form || !recordButton || !recordingSection || 
         !uploadSection || !textSection || !textContent || !contactPhone || !audioFile) {
-        console.error('Required form elements not found');
         return;
     }
 
@@ -173,39 +193,62 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to create audio player
     function createAudioPlayer(audioBlob) {
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audioPlayer = document.createElement('div');
-        audioPlayer.className = 'audio-player mt-3';
-        
-        // Only show duration if it's greater than 0
-        const durationHtml = recordingDuration > 0 ? 
-            `<div class="form-text mt-1"><span data-i18n="recordingDuration">Recording duration</span>: <span id="recordingDuration">${formatTime(recordingDuration)}</span></div>` : '';
-        
-        audioPlayer.innerHTML = `
-            <div class="d-flex align-items-center gap-3">
-                <audio controls class="form-control">
-                    <source src="${audioUrl}" type="${audioBlob.type}">
-                    Your browser does not support the audio element.
-                </audio>
-                <button type="button" class="btn btn-danger" id="deleteRecording">
-                    <i class="fas fa-trash"></i> <span data-i18n="delete">Delete</span>
-                </button>
-            </div>
-            ${durationHtml}
-        `;
-        
-        // Add delete recording functionality
-        audioPlayer.querySelector('#deleteRecording').addEventListener('click', () => {
-            audioPlayer.remove();
-            hasRecording = false;
-            audioChunks = [];
-            recordingDuration = 0;
-            const durationElement = document.getElementById('recordingDuration');
-            if (durationElement) {
-                durationElement.textContent = '';
-            }
-        });
+        const audioPlayback = document.getElementById('audioPlayback');
+        const deleteButton = document.getElementById('deleteRecording');
+        const startRecordingButton = document.getElementById('startRecording');
 
-        return audioPlayer;
+        if (!audioPlayback || !deleteButton || !startRecordingButton) {
+            return;
+        }
+
+        // Show audio playback and set source
+        audioPlayback.src = audioUrl;
+        audioPlayback.classList.remove('hidden');
+
+        // Show delete button, hide start recording button
+        deleteButton.classList.remove('d-none');
+        startRecordingButton.classList.add('d-none');
+
+        // Add delete recording functionality
+        const deleteHandler = () => {
+            // Hide audio playback
+            hideAudioPlayback();
+            
+            // Reset file input
+            const fileInput = document.getElementById('audioFile');
+            if (fileInput) {
+                fileInput.value = '';
+            }
+            
+            // Hide delete button, show start recording button
+            deleteButton.classList.add('d-none');
+            startRecordingButton.classList.remove('d-none');
+
+            // Remove the event listener to prevent multiple bindings
+            deleteButton.removeEventListener('click', deleteHandler);
+        };
+
+        // Add the event listener
+        deleteButton.addEventListener('click', deleteHandler);
+    }
+
+    // Function to hide audio playback (if needed)
+    function hideAudioPlayback() {
+        const audioPlayback = document.getElementById('audioPlayback');
+        const deleteButton = document.getElementById('deleteRecording');
+        const startRecordingButton = document.getElementById('startRecording');
+
+        // Hide audio playback
+        audioPlayback.src = '';
+        audioPlayback.classList.add('hidden');
+
+        // Hide delete button, show start recording button
+        if (deleteButton) {
+            deleteButton.classList.add('d-none');
+        }
+        if (startRecordingButton) {
+            startRecordingButton.classList.remove('d-none');
+        }
     }
 
     // Function to convert audio data to WAV
@@ -289,33 +332,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Check input method specific validations
         const selectedMethod = document.querySelector('input[name="inputMethod"]:checked').value;
-        const audioFile = document.getElementById('audioFile');
+        const formData = new FormData(form);
         
-        switch(selectedMethod) {
-            case 'record':
-                if (!hasRecording) {
-                    showNotification(t('recordingRequired'), 'error');
-                    return;
-                }
-                // Verify the audio file exists in the form
-                const recordedFile = form.querySelector('input[name="audioFile"]');
-                if (!recordedFile || !recordedFile.files.length) {
-                    showNotification(t('recordingError'), 'error');
-                    return;
-                }
-                break;
-            case 'upload':
-                if (!audioFile.files.length) {
-                    showNotification(t('fileRequired'), 'error');
-                    return;
-                }
-                break;
-            case 'text':
-                if (!textContent.value.trim()) {
-                    showNotification(t('textRequired'), 'error');
-                    return;
-                }
-                break;
+        if (selectedMethod === 'record') {
+            if (!hasRecording || !recordedAudioBlob) {
+                showNotification(t('recordingRequired'), 'error');
+                return;
+            }
+            // Remove any existing audioFile from FormData
+            formData.delete('audioFile');
+            // Append the recorded audio as a file
+            formData.append('audioFile', recordedAudioBlob, 'recording.wav');
+        } else if (selectedMethod === 'upload') {
+            if (!audioFile.files.length) {
+                showNotification(t('fileRequired'), 'error');
+                return;
+            }
+        } else if (selectedMethod === 'text') {
+            if (!textContent.value.trim()) {
+                showNotification(t('textRequired'), 'error');
+                return;
+            }
         }
         
         const severity = document.querySelector('input[name="severity"]:checked').value;
@@ -336,14 +373,11 @@ document.addEventListener('DOMContentLoaded', function() {
         form.appendChild(langInput);
 
         // Disable submit button and show loading state
-        const submitButton = form.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.innerHTML;
         submitButton.disabled = true;
         submitButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('sending')}`;
 
         try {
-            const formData = new FormData(form);
-            
             const response = await fetch('process.php', {
                 method: 'POST',
                 body: formData
@@ -353,189 +387,212 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (result.success) {
                 showNotification(result.message, 'info');
-                form.reset();
+                // Manually clear fields that should not be remembered
+                textContent.value = '';
+                audioFile.value = ''; // Clear file input
                 form.classList.remove('was-validated');
                 hasRecording = false;
                 
                 // Clear recording elements
-                const audioPlayer = document.querySelector('.audio-player');
-                if (audioPlayer) {
-                    audioPlayer.remove();
+                const audioPlayback = document.getElementById('audioPlayback');
+                if (audioPlayback) {
+                    audioPlayback.src = '';
+                    audioPlayback.classList.add('hidden');
                 }
-                const durationElement = document.getElementById('recordingDuration');
-                if (durationElement) {
-                    durationElement.textContent = '';
+                
+                // Remove delete button if it exists
+                const deleteButton = document.getElementById('deleteRecording');
+                if (deleteButton) {
+                    deleteButton.remove();
                 }
             } else {
                 showNotification(result.message, 'error');
             }
         } catch (error) {
-            console.error('Form submission error:', error);
             showNotification(t('errorSending'), 'error');
         } finally {
-            // Re-enable submit button and restore original text
+            // Re-enable submit button
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonText;
         }
     });
 
-    // Handle input method changes
+    // Handle input method changes with additional visibility checks
     document.querySelectorAll('input[name="inputMethod"]').forEach(radio => {
         radio.addEventListener('change', function() {
-            // Remove active class from all sections
+            // Remove active class and hide all sections
             [recordingSection, uploadSection, textSection].forEach(section => {
                 if (section) {
                     section.classList.remove('active');
+                    section.style.display = 'none';
                 }
             });
 
             // Reset required attributes
-            if (textContent) textContent.required = false;
-            if (audioFile) audioFile.required = false;
+            audioFile.required = false;
+            textContent.required = false;
 
             // Add active class to selected section and set required attribute
             switch(this.value) {
                 case 'record':
-                    if (recordingSection) recordingSection.classList.add('active');
+                    if (recordingSection) {
+                        recordingSection.classList.add('active');
+                        recordingSection.style.display = 'block';
+                        
+                        // Ensure record button is visible
+                        const startRecordingButton = document.getElementById('startRecording');
+                        const deleteRecordingButton = document.getElementById('deleteRecording');
+                        const audioPlayback = document.getElementById('audioPlayback');
+                        
+                        if (startRecordingButton) {
+                            startRecordingButton.style.display = 'inline-block';
+                            startRecordingButton.classList.remove('d-none');
+                        }
+                        
+                        if (deleteRecordingButton) {
+                            deleteRecordingButton.classList.add('d-none');
+                        }
+                        
+                        if (audioPlayback) {
+                            audioPlayback.classList.add('hidden');
+                            audioPlayback.src = '';
+                        }
+                        
+                        // Reset recording state
+                        hasRecording = false;
+                        audioChunks = [];
+                    }
                     break;
                 case 'upload':
                     if (uploadSection) {
                         uploadSection.classList.add('active');
-                        if (audioFile) audioFile.required = true;
+                        uploadSection.style.display = 'block';
+                        audioFile.required = true;
                     }
                     break;
                 case 'text':
                     if (textSection) {
                         textSection.classList.add('active');
-                        if (textContent) textContent.required = true;
+                        textSection.style.display = 'block';
+                        textContent.required = true;
                     }
                     break;
             }
         });
     });
 
-    // Start recording
-    recordButton.addEventListener('click', async () => {
-        // First request microphone permission
-        const hasPermission = await requestMicrophonePermission();
-        if (!hasPermission) {
+    // Start recording event listener
+    recordButton.addEventListener('click', async function recordingClickHandler(event) {
+        // Prevent multiple event bindings
+        recordButton.removeEventListener('click', recordingClickHandler);
+
+        // Check if already recording
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            // If already recording, stop the recording
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                clearInterval(recordingTimer);
+                recordingSection.classList.remove('recording');
+            }
+            
+            // Reset button state with current language translation
+            const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
+            recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording', currentLang)}</span>`;
+            recordButton.classList.remove('btn-danger');
+            recordButton.classList.add('btn-primary');
+            
+            // Re-add the event listener
+            recordButton.addEventListener('click', recordingClickHandler);
+            return;
+        }
+
+        const permissionGranted = await requestMicrophonePermission();
+        if (!permissionGranted) {
+            // Re-add the event listener if permission is not granted
+            recordButton.addEventListener('click', recordingClickHandler);
             return;
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: true
-            });
-            
-            // Check if MediaRecorder is supported
-            if (!window.MediaRecorder) {
-                throw new Error('MediaRecorder not supported');
-            }
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            // Try to use WebM first, fall back to other formats if needed
-            let mimeType = 'audio/webm;codecs=opus';
-            if (!MediaRecorder.isTypeSupported(mimeType)) {
-                mimeType = 'audio/wav';
-                if (!MediaRecorder.isTypeSupported(mimeType)) {
-                    mimeType = 'audio/mp4';
-                    if (!MediaRecorder.isTypeSupported(mimeType)) {
-                        mimeType = 'audio/mpeg';
-                    }
-                }
-            }
-
-            mediaRecorder = new MediaRecorder(stream, {
-                mimeType: mimeType,
-                audioBitsPerSecond: 128000
-            });
-            
             audioChunks = [];
             hasRecording = false;
             recordingStartTime = Date.now();
             recordingDuration = 0;
 
-            // Start the duration timer
-            recordingTimer = setInterval(updateRecordingDuration, 1000);
+            // Get current language
+            const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
 
-            mediaRecorder.addEventListener('dataavailable', event => {
-                audioChunks.push(event.data);
-            });
+            // Update button state with current language translation
+            recordButton.innerHTML = `<i class="fas fa-stop"></i> <span data-i18n="stopRecording">${t('stopRecording', currentLang)}</span>`;
+            recordButton.classList.add('btn-danger');
+            recordButton.classList.remove('btn-primary');
 
-            mediaRecorder.addEventListener('stop', async () => {
-                clearInterval(recordingTimer);
-                const audioBlob = new Blob(audioChunks, { type: mimeType });
-                
-                try {
-                    // Create an audio context
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Convert blob to array buffer
-                    const arrayBuffer = await audioBlob.arrayBuffer();
-                    
-                    // Decode the audio data
-                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                    
-                    // Convert to WAV
-                    const wavBlob = audioBufferToWav(audioBuffer);
-                    
-                    // Create a File object with the correct MIME type
-                    const audioFile = new File([wavBlob], 'recording.wav', { 
-                        type: 'audio/wav',
-                        lastModified: new Date().getTime()
-                    });
-                    
-                    // Remove any existing file input
-                    const existingFileInput = form.querySelector('input[name="audioFile"]');
-                    if (existingFileInput) {
-                        existingFileInput.remove();
-                    }
-                    
-                    // Create a new file input
-                    const fileInput = document.createElement('input');
-                    fileInput.type = 'file';
-                    fileInput.name = 'audioFile';
-                    fileInput.style.display = 'none';
-                    
-                    // Create a new DataTransfer object and add the file
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(audioFile);
-                    fileInput.files = dataTransfer.files;
-                    
-                    // Append the file input to the form
-                    form.appendChild(fileInput);
-
-                    // Add audio player
-                    const existingPlayer = document.querySelector('.audio-player');
-                    if (existingPlayer) {
-                        existingPlayer.remove();
-                    }
-                    const audioPlayer = createAudioPlayer(wavBlob);
-                    recordingSection.appendChild(audioPlayer);
-
-                    hasRecording = true;
-                } catch (error) {
-                    console.error('Error processing recording:', error);
-                    showNotification(t('recordingError'), 'error');
-                }
-            });
+            // Show recording controls
+            recordingSection.classList.add('recording');
 
             // Start recording
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                if (audioBlob.size > 0) {
+                    hasRecording = true;
+                    recordedAudioBlob = audioBlob;
+                    createAudioPlayer(audioBlob);
+                }
+                stream.getTracks().forEach(track => track.stop());
+
+                // Get current language again
+                const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
+
+                // Reset button state with current language translation
+                recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording', currentLang)}</span>`;
+                recordButton.classList.remove('btn-danger');
+                recordButton.classList.add('btn-primary');
+
+                // Re-add the event listener
+                recordButton.addEventListener('click', recordingClickHandler);
+            };
+
             mediaRecorder.start();
-            recordingSection.classList.add('recording');
+            recordingTimer = setInterval(updateRecordingDuration, 1000);
+
+            // Re-add the event listener
+            recordButton.addEventListener('click', recordingClickHandler);
+
         } catch (err) {
-            console.error('Error accessing microphone:', err);
-            showNotification(t('microphoneError'), 'error');
+            showNotification(t('recordingError'), 'error');
+            
+            // Re-add the event listener in case of error
+            recordButton.addEventListener('click', recordingClickHandler);
         }
     });
 
-    // Stop recording
-    stopButton.addEventListener('click', () => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
+    // Stop recording function
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
+            clearInterval(recordingTimer);
             recordingSection.classList.remove('recording');
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
         }
-    });
+    }
+
+    // Add event listener for delete recording button
+    const deleteButton = document.getElementById('deleteRecording');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', () => {
+            hideAudioPlayback();
+            deleteButton.classList.add('d-none');
+            recordButton.classList.remove('d-none');
+            audioChunks = [];
+            hasRecording = false;
+        });
+    }
 
     // Drag & Drop functionality
     const cardBody = document.querySelector('.card-body');
@@ -655,4 +712,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    // Hide audio playback on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const audioPlayback = document.getElementById('audioPlayback');
+        if (audioPlayback) {
+            audioPlayback.classList.add('hidden');
+        }
+    });
 }); 

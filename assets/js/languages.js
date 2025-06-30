@@ -43,6 +43,7 @@ const translations = {
         // Buttons
         submit: "Submit",
         delete: "Delete",
+        deleteRecording: "Delete Recording",
         
         // Messages
         businessHoursNote: "Please note that these requests will only be handled between business hours.",
@@ -115,6 +116,7 @@ const translations = {
         // Buttons
         submit: "Versturen",
         delete: "Verwijderen",
+        deleteRecording: "Opname Verwijderen",
         
         // Messages
         businessHoursNote: "Let op: deze aanvragen worden alleen tijdens kantooruren behandeld.",

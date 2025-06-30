@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - Drag & drop file upload functionality
 - Support email dynamically loaded from configuration using PHP
 - Mailto functionality works in both English and Dutch languages
+- Remember company name/email from previous submissions using sessions.
+- Play back recordings before submission.
 
 ### Changed
 - Updated support contact display to show actual email address instead of generic "support" text

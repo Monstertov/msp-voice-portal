@@ -149,8 +149,8 @@ const translations = {
 - [x] Clickable mailto link for support contact in disclaimer
 - [x] Drag & drop upload
 - [x] Configurable primary color accent in the config file
-- [ ] Remember company name/email from previous submissions
-- [ ] Play back recordings before submission
+- [x] Remember company name/email from previous submissions
+- [x] Play back recordings before submission
 - [ ] ElevenLabs integration
 
 
