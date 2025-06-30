@@ -53,6 +53,7 @@ All settings are in a file called `config.php`. We provide an example file to ge
     *   **SMTP details:** For sending emails (server, username, password, etc.).
     *   **File upload limits:** Match this with your server's PHP settings (see next step).
     *   **Security settings:** Adjust as needed.
+    *   **Primary Color:** Set the hexadecimal color code for the primary accent color (e.g., `#7289da`).
 
     *Example snippet from `config.php` (your values will differ):*
     ```php
@@ -164,7 +165,14 @@ upload_max_filesize = 20M
 post_max_size = 24M
 ```
 
-## 9. Access the Portal
+## 9. Customizing Branding (Logo, Favicon)
+
+To customize the portal with your MSP's branding, you can replace the default logo and favicon files located in the `assets/` directory.
+
+*   **Logo:** Replace `assets/logo-512x512.svg` with your own SVG logo. Ensure your logo is also 512x512 pixels for optimal display.
+*   **Favicon:** Replace the various `favicon.ico`, `favicon.svg`, `apple-touch-icon.png`, `favicon-96x96.png`, `web-app-manifest-192x192.png`, and `web-app-manifest-512x512.png` files with your own. It's recommended to use a favicon generator to create all necessary sizes from a single source image.
+
+## 10. Access the Portal
 
 Once all steps are complete, open your web browser and navigate to the domain or IP address where you configured the portal.
 

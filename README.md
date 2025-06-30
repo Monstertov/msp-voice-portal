@@ -28,7 +28,7 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 - Rate limiting protection
 - CSRF protection
 - Comprehensive error handling
-- Easy CSS theming
+- Easy theming or styling to the MSP needs (e.g., logo, colors)
 
 ## Readme Index
 
@@ -148,7 +148,7 @@ const translations = {
 - [x] Contact support integration in error messages
 - [x] Clickable mailto link for support contact in disclaimer
 - [x] Drag & drop upload
-- [ ] Configurable primary color accent in CSS
+- [x] Configurable primary color accent in the config file
 - [ ] Remember company name/email from previous submissions
 - [ ] Play back recordings before submission
 - [ ] ElevenLabs integration

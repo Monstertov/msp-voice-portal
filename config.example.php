@@ -21,6 +21,7 @@ return [
 
     // Application Settings
     'application_title' => 'MSP Voice Portal',
+    'primary_color' => '#7289da', // Default primary color for accents and buttons
     'require_notes' => true,
     'max_file_size' => 10 * 1024 * 1024, // 10MB
     'default_language' => 'en',

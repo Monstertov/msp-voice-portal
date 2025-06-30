@@ -60,6 +60,11 @@ error_reporting($config['error_handling']['error_reporting']);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: <?php echo htmlspecialchars($config['primary_color']); ?>;
+        }
+    </style>
 </head>
 <body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>">
     <div class="container py-2">
