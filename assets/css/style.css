@@ -699,4 +699,21 @@ footer a:hover {
 
 #uploadSection, #textSection {
     margin-bottom: 1.5rem;
+}
+
+@media (max-width: 576px) {
+    .recording-controls {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.5rem !important;
+    }
+    .recording-controls > * {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    #audioPlayback {
+        max-width: 100%;
+        width: 100%;
+    }
 } 
