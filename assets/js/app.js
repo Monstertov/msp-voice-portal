@@ -489,40 +489,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Start recording event listener
     async function recordingClickHandler(event) {
-        // Prevent double clicks or race conditions
-        if (recordingInProgress) return;
-        recordingInProgress = true;
-
+        // If currently recording, allow stop immediately
         if (isRecording) {
-            // Stop recording
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                recordButton.disabled = true;
                 mediaRecorder.stop();
                 clearInterval(recordingTimer);
                 recordingSection.classList.remove('recording');
-                // isRecording will be set to false in onstop
             }
-            recordingInProgress = false;
+            // Do not set recordingInProgress here, onstop will handle it
             return;
         }
 
-        // If already preparing or disabled, do nothing
-        if (recordButton.disabled) {
-            recordingInProgress = false;
+        // If already starting, prevent double start
+        if (recordingInProgress) {
             return;
         }
+        recordingInProgress = true; // Only set here, not at the very top
 
-        // Set state immediately
-        isRecording = true;
+        recordButton.disabled = true;
 
         // Show preparation indicator inside the button
         const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
         recordButton.innerHTML = `<i class='fas fa-spinner fa-spin'></i> <span data-i18n='preparingRecording'>${t('preparingRecording', currentLang)}</span>`;
-        recordButton.disabled = true;
-
-        // Always re-attach the handler after innerHTML change
-        recordButton.removeEventListener('click', recordingClickHandler);
-        recordButton.addEventListener('click', recordingClickHandler);
 
         const permissionGranted = await requestMicrophonePermission();
         if (!permissionGranted) {
@@ -531,9 +519,6 @@ document.addEventListener('DOMContentLoaded', function() {
             recordButton.disabled = false;
             isRecording = false;
             recordingInProgress = false;
-            // Always re-attach the handler after innerHTML change
-            recordButton.removeEventListener('click', recordingClickHandler);
-            recordButton.addEventListener('click', recordingClickHandler);
             return;
         }
 
@@ -548,13 +533,8 @@ document.addEventListener('DOMContentLoaded', function() {
             recordButton.innerHTML = `<i class="fas fa-stop"></i> <span data-i18n="stopRecording">${t('stopRecording', currentLang)}</span> <span id="recordingTime" style="margin-left:0.5rem;font-weight:bold;color:#ffc107;">00:00</span>`;
             recordButton.classList.add('btn-danger');
             recordButton.classList.remove('btn-primary');
-            recordButton.disabled = false;
+            recordButton.disabled = false; // Re-enable button after successful start
 
-            // Always re-attach the handler after innerHTML change
-            recordButton.removeEventListener('click', recordingClickHandler);
-            recordButton.addEventListener('click', recordingClickHandler);
-
-            audioChunks = [];
             hasRecording = false;
             recordingStartTime = Date.now();
             recordingDuration = 0;
@@ -564,9 +544,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Start recording
             mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+
             mediaRecorder.ondataavailable = (event) => {
                 audioChunks.push(event.data);
             };
+
+            // Set state to recording
+            isRecording = true;
 
             // Set timeout to stop recording at max duration
             let maxDurationTimeout = setTimeout(() => {
@@ -574,13 +559,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     mediaRecorder.stop();
                     clearInterval(recordingTimer);
                     recordingSection.classList.remove('recording');
-                    // isRecording will be set in onstop
                     const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
                     showNotification(t('maxDurationReached', currentLang), 'error');
                 }
             }, maxRecordingDuration * 1000);
 
             mediaRecorder.onstop = async () => {
+                recordingInProgress = false; // Reset flag immediately
                 clearTimeout(maxDurationTimeout);
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 if (audioBlob.size > 0) {
@@ -594,11 +579,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">${t('startRecording', currentLang)}</span>`;
                 recordButton.classList.remove('btn-danger');
                 recordButton.classList.add('btn-primary');
-                recordButton.disabled = false;
-                // Always re-attach the handler after innerHTML change
-                recordButton.removeEventListener('click', recordingClickHandler);
-                recordButton.addEventListener('click', recordingClickHandler);
-                recordingInProgress = false;
+                recordButton.disabled = false; // Re-enable button after stop
             };
 
             // Timer logic inside the button
@@ -618,11 +599,8 @@ document.addEventListener('DOMContentLoaded', function() {
             recordButton.innerHTML = originalRecordButtonContent;
             recordButton.disabled = false;
             isRecording = false;
+            recordingInProgress = false; // Ensure flag is reset on error
             showNotification(t('recordingError'), 'error');
-            // Always re-attach the handler after innerHTML change
-            recordButton.removeEventListener('click', recordingClickHandler);
-            recordButton.addEventListener('click', recordingClickHandler);
-            recordingInProgress = false;
         }
     }
 
