@@ -35,7 +35,8 @@ const translations = {
         
         // File Upload
         uploadAudioFile: "Upload Audio File",
-        supportedFormats: "Supported formats: MP3, WAV, MP4, WebM",
+        supportedFormats: "Supported formats: MP3, WAV, MP4, WebM, OGG, AAC, M4A",
+        chooseFile: "Choose File",
         
         // Text Input
         enterText: "Enter Text",
@@ -111,7 +112,8 @@ const translations = {
         
         // File Upload
         uploadAudioFile: "Audio Bestand Uploaden",
-        supportedFormats: "Ondersteunde formaten: MP3, WAV, MP4, WebM",
+        supportedFormats: "Ondersteunde formaten: MP3, WAV, MP4, WebM, OGG, AAC, M4A",
+        chooseFile: "Kies Bestand",
         
         // Text Input
         enterText: "Voer Tekst In",

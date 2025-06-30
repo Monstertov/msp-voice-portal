@@ -754,4 +754,14 @@ document.addEventListener('DOMContentLoaded', function() {
             audioPlayback.classList.add('hidden');
         }
     });
+
+    // Custom file input logic
+    const audioFileInput = document.getElementById('audioFile');
+    const customFileLabel = document.getElementById('customFileLabel');
+    const fileNameSpan = document.getElementById('fileName');
+    if (audioFileInput && customFileLabel && fileNameSpan) {
+        audioFileInput.addEventListener('change', function() {
+            fileNameSpan.textContent = this.files[0] ? this.files[0].name : '';
+        });
+    }
 }); 
