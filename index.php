@@ -117,12 +117,12 @@ error_reporting($config['error_handling']['error_reporting']);
                                     <button type="button" id="startRecording" class="btn btn-primary record-button">
                                         <i class="fas fa-microphone"></i> <span id="recordButtonText">Start Recording</span>
                                     </button>
-                                    <button type="button" id="deleteRecording" class="btn btn-danger d-none">
+                                    <audio id="audioPlayback" controls class="ms-2 hidden"></audio>
+                                    <button type="button" id="deleteRecording" class="btn btn-danger d-none ms-2">
                                         <i class="fas fa-trash"></i> <span id="deleteButtonText">Delete Recording</span>
                                     </button>
                                 </div>
                                 <div class="waveform" id="waveform"></div>
-                                <audio id="audioPlayback" controls class="mt-3 hidden"></audio>
                             </div>
 
                             <!-- File Upload Section -->

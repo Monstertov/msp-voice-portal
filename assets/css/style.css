@@ -259,6 +259,7 @@ body::after {
     height: auto !important;
     overflow: visible !important;
     display: flex !important;
+    align-items: center;
 }
 
 .recording .recording-controls {
@@ -273,6 +274,7 @@ body::after {
 /* Recording section alignment */
 #recordingSection {
     text-align: left;
+    margin-bottom: 1.5rem;
 }
 
 #recordingSection .waveform {
@@ -687,4 +689,14 @@ footer a:hover {
 
 .card-body.drag-over::before {
     pointer-events: none;
+}
+
+#audioPlayback {
+    max-width: 250px;
+    height: 40px;
+    vertical-align: middle;
+}
+
+#uploadSection, #textSection {
+    margin-bottom: 1.5rem;
 } 
