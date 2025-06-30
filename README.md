@@ -19,6 +19,7 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 ## Features
 
 - Multiple input methods (audio recording, file upload, text)
+- **Configurable max recording duration with user warnings**
 - Secure file handling and validation
 - Email notifications
 - Multi-language support
@@ -45,6 +46,18 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 ## Installation
 
 For detailed installation instructions, please refer to the [INSTALL.md](INSTALL.md) guide.
+
+### Configuring Max Recording Duration
+
+You can set the maximum allowed duration for audio recordings (in seconds) in your `config.php`:
+
+```php
+// config.php
+'recording_max_duration' => 60, // 60 seconds (default)
+```
+
+- The frontend will warn users of the limit before recording starts.
+- If the limit is reached, recording will automatically stop and a warning will be shown.
 
 ## Supported File Types
 
@@ -155,7 +168,7 @@ const translations = {
 - [ ] Custom style audio playback 
 
 ### Technical Improvements
-- [ ] Configurable max recording duration with warnings
+- [x] Configurable max recording duration with warnings
 - [x] Add file format validation for new formats
 - [ ] Implement multi-file upload handling (split in multiple e-mails)
 - [x] Add MSP support contact configuration in config.php

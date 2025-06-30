@@ -114,7 +114,7 @@ error_reporting($config['error_handling']['error_reporting']);
                             <!-- Audio Recording Section -->
                             <div id="recordingSection" class="input-section active">
                                 <div class="recording-controls d-flex align-items-center gap-2">
-                                    <button type="button" id="startRecording" class="btn btn-primary record-button">
+                                    <button type="button" id="startRecording" class="btn btn-primary record-button" data-max-duration="<?php echo isset($config['recording_max_duration']) ? (int)$config['recording_max_duration'] : 60; ?>">
                                         <i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">Start Recording</span>
                                     </button>
                                     <button type="button" id="deleteRecording" class="btn btn-danger d-none ms-2">

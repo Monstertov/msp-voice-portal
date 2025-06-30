@@ -101,5 +101,9 @@ return [
         'log_errors' => true,
         'error_log' => __DIR__ . '/logs/error.log',
         'error_reporting' => E_ALL
-    ]
+    ],
+
+    // Maximum recording duration in seconds (frontend enforced)
+    // Example: 60 for 1 minute, 180 for 3 minutes
+    'recording_max_duration' => 60,
 ]; 

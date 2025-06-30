@@ -71,7 +71,9 @@ const translations = {
         filesUploaded: "Files uploaded",
         dropAudioFilesOnly: "Please drop audio files only (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
         submissionSuccess: "Your submission has been received successfully.",
-        preparingRecording: "Preparing to record... Please wait."
+        preparingRecording: "Preparing to record... Please wait.",
+        maxDurationWarning: "Maximum recording duration: {duration} seconds.",
+        maxDurationReached: "Maximum recording time reached. Recording stopped."
     },
     nl: {
         // Recording Method
@@ -144,7 +146,9 @@ const translations = {
         submissionSuccess: "Uw aanvraag is succesvol ontvangen.",
         filesUploaded: "Bestanden geüpload",
         dropAudioFilesOnly: "Plaats alleen audiobestanden (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
-        preparingRecording: "Opname wordt voorbereid... Even geduld aub."
+        preparingRecording: "Opname wordt voorbereid... Even geduld aub.",
+        maxDurationWarning: "Maximale opnameduur: {duration} seconden.",
+        maxDurationReached: "Maximale opnameduur bereikt. Opname gestopt."
     }
 };
 
