@@ -694,9 +694,9 @@ footer a:hover {
 /* Custom audio player styling */
 #audioPlayback {
     background: var(--bg-card);
-    border: 1.5px solid var(--primary-color);
+    border: 1.5px solid rgba(255,255,255,0.08); /* subtle light border for dark theme */
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    box-shadow: none;
     padding: 0.25rem 0.75rem;
     color: var(--text-primary);
     max-width: 320px;
@@ -707,8 +707,8 @@ footer a:hover {
     transition: border-color 0.2s;
 }
 #audioPlayback:focus {
-    outline: 2px solid var(--primary-color);
-    border-color: var(--primary-hover);
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 /* Make audio controls blend in on dark backgrounds */
