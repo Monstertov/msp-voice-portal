@@ -179,3 +179,38 @@ Once all steps are complete, open your web browser and navigate to the domain or
 If you encounter any issues, check your web server's error logs and the `logs/` directory within the portal for more details.
 
 **Note:** Always keep your software updated and follow security best practices!
+
+## Configuring Max Recording Duration
+
+You can set the maximum allowed duration for audio recordings (in seconds) in your `config.php`:
+
+```php
+// config.php
+'recording_max_duration' => 60, // 60 seconds (default)
+```
+
+- The frontend will warn users of the limit before recording starts.
+- If the limit is reached, recording will automatically stop and a warning will be shown.
+
+## Setting Up Mail Receiver and Support Email
+
+In your `config.php`, you can configure where form submissions are sent and what email address is shown to users for support. These can be the same or different addresses, depending on your MSP's workflow.
+
+### Example:
+```php
+// config.php
+'email' => [
+    'to' => 'receiver@example.com', // The email address that receives form submissions
+    // ... other SMTP settings ...
+],
+
+'support' => [
+    'email' => 'support@example.com', // The support contact email shown to users
+    'name' => 'MSP Support Team'
+],
+```
+
+- **Mail Receiver (`email.to`)**: This is the address that will receive all form submissions (audio, text, etc.).
+- **Support Email (`support.email`)**: This is the address shown to users in the portal for support/contact. It can be the same as the receiver, or a different address (e.g., a helpdesk or ticketing system).
+
+**Tip:** If you want all notifications and support requests to go to the same address, set both to the same value. If you want to separate customer support from form submissions, use different addresses.
