@@ -151,82 +151,6 @@ const translations = {
         preparingRecording: "Opname wordt voorbereid... Even geduld aub.",
         maxDurationWarning: "Maximale opnameduur: {duration} seconden.",
         maxDurationReached: "Maximale opnameduur bereikt. Opname gestopt."
-    },
-    fr: {
-        // Recording Method
-        recordingMethod: "Méthode d'enregistrement",
-        recordAudio: "Enregistrer l'audio",
-        uploadAudio: "Télécharger l'audio",
-        textInput: "Saisie de texte",
-        
-        // Recording Controls
-        startRecording: "Commencer l'enregistrement",
-        stopRecording: "Arrêter l'enregistrement",
-        recordingDuration: "Durée d'enregistrement",
-        
-        // Form Labels
-        companyName: "Nom de l'entreprise",
-        contactEmail: "Email de contact",
-        contactPhone: "Téléphone de contact",
-        notes: "Notes",
-        severityLevel: "Niveau de priorité",
-        requiredFields: "Champs obligatoires",
-        
-        // Severity Levels
-        normal: "Normal",
-        high: "Élevé",
-        emergency: "Urgence",
-        normalDescription: "Traitement sous quelques jours ouvrables",
-        highDescription: "Doit être fait avant demain",
-        emergencyDescription: "Doit être fait dès que possible",
-        
-        // Form Placeholders
-        companyNamePlaceholder: "Ajoutez le nom de votre entreprise",
-        emailPlaceholder: "Ajoutez votre adresse e-mail",
-        phonePlaceholder: "Ajoutez votre numéro de téléphone",
-        notesPlaceholder: "Précisez quand l'enregistrement doit être joué (date et heure) et toute autre information pertinente. Et si applicable, ajoutez le numéro de téléphone externe pour lequel l'enregistrement audio est destiné, ex. +33 1 23 45 67 89.",
-        
-        // File Upload
-        uploadAudioFile: "Télécharger un fichier audio",
-        supportedFormats: "Formats supportés : MP3, WAV, MP4, WebM, OGG, AAC, M4A",
-        chooseFile: "Choisir un fichier",
-        
-        // Text Input
-        enterText: "Saisir du texte",
-        
-        // Buttons
-        submit: "Envoyer",
-        delete: "Supprimer",
-        deleteRecording: "Supprimer l'enregistrement",
-        
-        // Messages
-        businessHoursNote: "Veuillez noter que ces demandes ne seront traitées que pendant les heures de bureau.",
-        forAssistanceContact: "Pour obtenir de l'aide, contactez",
-        dragDropHint: "💡 Conseil : Vous pouvez glisser-déposer des fichiers audio n'importe où sur ce formulaire",
-        dropAudioFilesHere: "Déposez les fichiers audio ici",
-        developedBy: "Développé par",
-        
-        // Notifications
-        recordingNotSupported: "Votre navigateur ne prend pas en charge l'enregistrement audio. Veuillez utiliser un navigateur moderne ou essayer l'option de téléchargement.",
-        httpsRequired: "L'enregistrement audio nécessite une connexion sécurisée (HTTPS) ou localhost.",
-        allowMicrophone: "Veuillez autoriser l'accès au microphone dans les paramètres de votre navigateur. Cliquez sur l'icône caméra/microphone dans la barre d'adresse pour accorder l'autorisation.",
-        noMicrophone: "Aucun microphone trouvé. Veuillez vous assurer que votre appareil dispose d'un microphone.",
-        microphoneBusy: "Votre microphone est occupé ou ne fonctionne pas. Veuillez réessayer ou utiliser l'option de téléchargement.",
-        recordingError: "Erreur lors du traitement de l'enregistrement. Veuillez réessayer.",
-        microphoneError: "Erreur d'accès au microphone. Veuillez essayer l'option de téléchargement.",
-        invalidEmail: "Veuillez saisir une adresse e-mail valide.",
-        invalidPhone: "Veuillez saisir un numéro de téléphone valide (seuls les chiffres et le symbole + sont autorisés).",
-        recordingRequired: "Veuillez enregistrer un message avant d'envoyer.",
-        fileRequired: "Veuillez sélectionner un fichier audio à télécharger.",
-        textRequired: "Veuillez saisir du texte avant d'envoyer.",
-        sending: "Envoi en cours...",
-        errorSending: "Une erreur s'est produite lors de l'envoi de votre demande. Veuillez réessayer.",
-        submissionSuccess: "Votre demande a été reçue avec succès.",
-        filesUploaded: "Fichiers téléchargés",
-        dropAudioFilesOnly: "Veuillez déposer uniquement des fichiers audio (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
-        preparingRecording: "Préparation de l'enregistrement... Veuillez patienter.",
-        maxDurationWarning: "Durée maximale d'enregistrement : {duration} secondes.",
-        maxDurationReached: "Durée maximale d'enregistrement atteinte. Enregistrement arrêté."
     }
 };
 
@@ -268,7 +192,6 @@ function addLanguageSelector() {
         <select class="form-select" id="languageSelect">
             <option value="en">English</option>
             <option value="nl">Nederlands</option>
-            <option value="fr">Français</option>
         </select>
     `;
     
