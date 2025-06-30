@@ -114,7 +114,7 @@ error_reporting($config['error_handling']['error_reporting']);
                             <!-- Audio Recording Section -->
                             <div id="recordingSection" class="input-section active">
                                 <div class="recording-controls d-flex align-items-center gap-2">
-                                    <button type="button" id="startRecording" class="btn btn-primary record-button">
+                                    <button type="button" id="startRecording" class="btn btn-primary record-button" data-max-duration="<?php echo isset($config['recording_max_duration']) ? (int)$config['recording_max_duration'] : 60; ?>">
                                         <i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">Start Recording</span>
                                     </button>
                                     <button type="button" id="deleteRecording" class="btn btn-danger d-none ms-2">
@@ -128,7 +128,11 @@ error_reporting($config['error_handling']['error_reporting']);
                             <!-- File Upload Section -->
                             <div id="uploadSection" class="input-section">
                                 <label for="audioFile" class="form-label" data-i18n="uploadAudioFile">Upload Audio File</label>
-                                <input type="file" class="form-control" id="audioFile" name="audioFile" accept=".mp3,.wav,.mp4,.webm,.ogg,.aac,.m4a,audio/mpeg,audio/wav,audio/mp4,audio/webm,audio/ogg,audio/aac,audio/x-m4a">
+                                <div class="custom-file-group">
+                                    <input type="file" class="custom-file-input" id="audioFile" name="audioFile" accept=".mp3,.wav,.mp4,.webm,.ogg,.aac,.m4a,audio/mpeg,audio/wav,audio/mp4,audio/webm,audio/ogg,audio/aac,audio/x-m4a">
+                                    <label for="audioFile" class="custom-file-label" id="customFileLabel"><i class="fas fa-upload"></i> <span data-i18n="chooseFile">Choose File</span></label>
+                                    <span id="fileName" class="file-name"></span>
+                                </div>
                                 <div class="form-text" data-i18n="supportedFormats">Supported formats: MP3, WAV, MP4, WebM, OGG, AAC, M4A</div>
                             </div>
 

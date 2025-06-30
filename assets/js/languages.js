@@ -35,7 +35,8 @@ const translations = {
         
         // File Upload
         uploadAudioFile: "Upload Audio File",
-        supportedFormats: "Supported formats: MP3, WAV, MP4, WebM",
+        supportedFormats: "Supported formats: MP3, WAV, MP4, WebM, OGG, AAC, M4A",
+        chooseFile: "Choose File",
         
         // Text Input
         enterText: "Enter Text",
@@ -70,7 +71,10 @@ const translations = {
         submissionSuccess: "Your submission has been received successfully.",
         filesUploaded: "Files uploaded",
         dropAudioFilesOnly: "Please drop audio files only (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
-        submissionSuccess: "Your submission has been received successfully."
+        submissionSuccess: "Your submission has been received successfully.",
+        preparingRecording: "Preparing to record... Please wait.",
+        maxDurationWarning: "Maximum recording duration: {duration} seconds.",
+        maxDurationReached: "Maximum recording time reached. Recording stopped."
     },
     nl: {
         // Recording Method
@@ -108,7 +112,8 @@ const translations = {
         
         // File Upload
         uploadAudioFile: "Audio Bestand Uploaden",
-        supportedFormats: "Ondersteunde formaten: MP3, WAV, MP4, WebM",
+        supportedFormats: "Ondersteunde formaten: MP3, WAV, MP4, WebM, OGG, AAC, M4A",
+        chooseFile: "Kies Bestand",
         
         // Text Input
         enterText: "Voer Tekst In",
@@ -142,7 +147,10 @@ const translations = {
         errorSending: "Er is een fout opgetreden bij het versturen van uw aanvraag. Probeer het opnieuw.",
         submissionSuccess: "Uw aanvraag is succesvol ontvangen.",
         filesUploaded: "Bestanden geüpload",
-        dropAudioFilesOnly: "Plaats alleen audiobestanden (MP3, WAV, MP4, WebM, OGG, AAC, M4A)"
+        dropAudioFilesOnly: "Plaats alleen audiobestanden (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
+        preparingRecording: "Opname wordt voorbereid... Even geduld aub.",
+        maxDurationWarning: "Maximale opnameduur: {duration} seconden.",
+        maxDurationReached: "Maximale opnameduur bereikt. Opname gestopt."
     }
 };
 
