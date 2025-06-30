@@ -691,10 +691,49 @@ footer a:hover {
     pointer-events: none;
 }
 
+/* Custom audio player styling */
 #audioPlayback {
-    max-width: 250px;
-    height: 40px;
-    vertical-align: middle;
+    background: var(--bg-card);
+    border: 1.5px solid var(--primary-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    padding: 0.25rem 0.75rem;
+    color: var(--text-primary);
+    max-width: 320px;
+    width: 100%;
+    height: 44px;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    transition: border-color 0.2s;
+}
+#audioPlayback:focus {
+    outline: 2px solid var(--primary-color);
+    border-color: var(--primary-hover);
+}
+
+/* Make audio controls blend in on dark backgrounds */
+#audioPlayback::-webkit-media-controls-panel {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 12px;
+}
+#audioPlayback::-webkit-media-controls-play-button,
+#audioPlayback::-webkit-media-controls-timeline,
+#audioPlayback::-webkit-media-controls-current-time-display,
+#audioPlayback::-webkit-media-controls-time-remaining-display,
+#audioPlayback::-webkit-media-controls-volume-slider {
+    filter: invert(0.85) brightness(0.9);
+}
+
+/* Responsive audio player for mobile */
+@media (max-width: 576px) {
+    #audioPlayback {
+        max-width: 100%;
+        min-width: 0;
+        height: 44px;
+        font-size: 1rem;
+        padding: 0.25rem 0.25rem;
+    }
 }
 
 #uploadSection, #textSection {
@@ -711,9 +750,5 @@ footer a:hover {
         width: 100%;
         margin-left: 0 !important;
         margin-right: 0 !important;
-    }
-    #audioPlayback {
-        max-width: 100%;
-        width: 100%;
     }
 } 
