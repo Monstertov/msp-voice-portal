@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 - Updated support contact display to show actual email address instead of generic "support" text
 - Enhanced user experience with intuitive drag & drop interface
 - Improved file upload workflow with automatic method selection
-- Minor bug fixes
+- Minor bug fixes (mobile UI, recording upload etc)
 
 ## [0.9.1-beta] - 2025-06-30
 
@@ -48,15 +48,3 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - N/A
-
-### Deprecated
-- N/A
-
-### Removed
-- N/A
-
-### Fixed
-- N/A
-
-### Security
-- N/A 
