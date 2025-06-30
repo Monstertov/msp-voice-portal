@@ -19,7 +19,7 @@ A secure web application for MSP (Managed Service Provider) companies to collect
 ## Features
 
 - Multiple input methods (audio recording, file upload, text)
-- **Configurable max recording duration with user warnings**
+- Configurable max recording duration with user warnings
 - Secure file handling and validation
 - Email notifications
 - Multi-language support
