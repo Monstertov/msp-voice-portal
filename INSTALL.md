@@ -2,6 +2,15 @@
 
 This guide provides simple steps to get your MSP Voice Portal up and running. You don't need to be a web development expert to follow these instructions.
 
+## Quick Start (TL;DR)
+
+1. **Download** the project files from GitHub
+2. **Configure** `config.php` with your SMTP and support email settings
+3. **Create** an `uploads` folder and set proper permissions
+4. **Access** the portal via your web browser
+
+For detailed instructions, continue reading below.
+
 ## 1. Requirements
 
 Before you start, make sure you have these installed on your server:
@@ -84,6 +93,34 @@ The portal needs a place to store uploaded audio files.
     chmod 755 uploads
     chown www-data:www-data uploads # Replace 'www-data:www-data' with your web server user/group (e.g., 'nginx:nginx' for Nginx)
     ```
+
+    **For Plesk hosting:**
+    ```bash
+    chmod 755 uploads
+    chown psaserv:psaserv uploads
+    # Or if using Apache with Plesk:
+    chown apache:apache uploads
+    ```
+    > **Note:** For detailed Plesk permission setup, see the [Plesk documentation](https://docs.plesk.com/en-US/obsidian/administrator-guide/web-hosting/web-sites-and-domains/website-permissions.73385/).
+
+    **For DirectAdmin hosting:**
+    ```bash
+    chmod 755 uploads
+    chown apache:apache uploads
+    # Or if using a specific user account:
+    chown yourusername:apache uploads
+    ```
+    > **Note:** For DirectAdmin-specific setup, refer to the [DirectAdmin documentation](https://www.directadmin.com/features.php?id=1838) and [DirectAdmin forums](https://forum.directadmin.com/) for permission configuration.
+
+    **For cPanel hosting:**
+    ```bash
+    chmod 755 uploads
+    chown yourusername:yourusername uploads
+    # The web server will run as your username in cPanel
+    ```
+    > **Note:** For cPanel file permission setup, see the [cPanel File Manager documentation](https://kb.hosting.com/docs/file-permissions) for detailed instructions on setting permissions through the File Manager interface.
+
+    **Note:** If you're unsure about your web server user, check your hosting provider's documentation or contact their support. The web server user is typically `www-data`, `apache`, `nginx`, or your hosting account username.
 
 ## 6. Configure Your Web Server (Apache/Nginx)
 
@@ -214,3 +251,161 @@ In your `config.php`, you can configure where form submissions are sent and what
 - **Support Email (`support.email`)**: This is the address shown to users in the portal for support/contact. It can be the same as the receiver, or a different address (e.g., a helpdesk or ticketing system).
 
 **Tip:** If you want all notifications and support requests to go to the same address, set both to the same value. If you want to separate customer support from form submissions, use different addresses.
+
+## Troubleshooting
+
+If you encounter issues during installation, here are common problems and their solutions:
+
+### Problem: "Upload failed" or "File upload error"
+
+**Symptoms:**
+- Users can't upload audio files
+- Error messages about file uploads
+- Files appear to upload but don't save
+
+**Solutions:**
+1. **Check uploads folder permissions:**
+   ```bash
+   ls -la uploads/
+   # Should show: drwxr-xr-x (755 permissions)
+   ```
+
+2. **Verify web server user ownership:**
+   ```bash
+   ls -la uploads/
+   # Should show your web server user (www-data, apache, etc.)
+   ```
+
+3. **Check PHP upload limits in php.ini:**
+   ```ini
+   upload_max_filesize = 20M
+   post_max_size = 24M
+   max_execution_time = 300
+   ```
+
+4. **Test with a small file first** (under 1MB) to isolate size-related issues.
+
+### Problem: "Email not sending" or "SMTP error"
+
+**Symptoms:**
+- Form submissions don't generate email notifications
+- SMTP connection errors
+- Emails go to spam folder
+
+**Solutions:**
+1. **Verify SMTP settings in config.php:**
+   - Check host, port, username, and password
+   - Ensure SSL/TLS settings match your provider
+
+2. **Test SMTP connection:**
+   ```php
+   // Add this to a test file to verify SMTP
+   require 'vendor/autoload.php';
+   $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+   $mail->isSMTP();
+   $mail->Host = 'your.smtp.server.com';
+   $mail->Port = 587;
+   $mail->SMTPAuth = true;
+   $mail->Username = 'your_username';
+   $mail->Password = 'your_password';
+   ```
+
+3. **Check hosting provider's SMTP restrictions** - some hosts block external SMTP
+
+4. **Use alternative email services** like SendGrid, Mailgun, or Gmail SMTP
+
+### Problem: "Recording not working" or "Microphone access denied"
+
+**Symptoms:**
+- Audio recording button doesn't work
+- Browser shows microphone permission errors
+- Recording starts but stops immediately
+
+**Solutions:**
+1. **Ensure HTTPS is enabled** - modern browsers require secure connections for microphone access
+
+2. **Check browser permissions:**
+   - Click the camera/microphone icon in the address bar
+   - Ensure microphone access is allowed
+
+3. **Test in different browsers** - Chrome, Firefox, Safari, Edge
+
+4. **Check for browser extensions** that might block microphone access
+
+### Problem: "Page not loading" or "500 Internal Server Error"
+
+**Symptoms:**
+- Portal doesn't load in browser
+- Server error messages
+- Blank white page
+
+**Solutions:**
+1. **Check PHP version compatibility:**
+   ```bash
+   php -v
+   # Should be 7.4 or higher
+   ```
+
+2. **Verify file permissions:**
+   ```bash
+   ls -la *.php
+   # Should be readable by web server (644)
+   ```
+
+3. **Check web server error logs:**
+   - Apache: `/var/log/apache2/error.log`
+   - Nginx: `/var/log/nginx/error.log`
+   - cPanel: Check error logs in hosting panel
+
+4. **Enable error display temporarily** in config.php:
+   ```php
+   'error_handling' => [
+       'display_errors' => true, // Temporarily enable for debugging
+       'log_errors' => true,
+   ]
+   ```
+
+### Problem: "Language not switching" or "Translation errors"
+
+**Symptoms:**
+- Language switcher doesn't work
+- Mixed languages displayed
+- Missing translations
+
+**Solutions:**
+1. **Clear browser cache** and cookies
+2. **Check JavaScript console** for errors (F12 → Console)
+3. **Verify language files** are properly loaded
+4. **Test with different browsers** to isolate browser-specific issues
+
+### Problem: "Security headers causing issues"
+
+**Symptoms:**
+- Mixed content warnings
+- External resources not loading
+- CSP (Content Security Policy) violations
+
+**Solutions:**
+1. **Review security headers** in config.php
+2. **Add missing domains** to CSP directives
+3. **Check browser console** for specific CSP violations
+4. **Temporarily disable security headers** for testing:
+   ```php
+   'security_headers' => [
+       'content_security_policy' => [
+           'default-src' => ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+           // Add other domains as needed
+       ]
+   ]
+   ```
+
+### Still Having Issues?
+
+If you're still experiencing problems:
+
+1. **Check the logs directory** for detailed error messages
+2. **Review your hosting provider's documentation** for specific requirements
+3. **Contact your hosting provider's support** for server-level issues
+4. **Open an issue on GitHub** with detailed error messages and your configuration (remove sensitive data)
+
+**Remember:** Always keep your software updated and follow security best practices!
