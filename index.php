@@ -73,6 +73,9 @@ error_reporting($config['error_handling']['error_reporting']);
                     <button type="button" class="<?php echo $config['default_language'] === 'nl' ? 'active' : ''; ?>" data-lang="nl">
                         <img src="https://flagcdn.com/24x18/nl.png" alt="Nederlands" title="Nederlands">
                     </button>
+                    <button type="button" class="<?php echo $config['default_language'] === 'fr' ? 'active' : ''; ?>" data-lang="fr">
+                        <img src="https://flagcdn.com/24x18/fr.png" alt="Français" title="Français">
+                    </button>
                 </div>
                 <div class="card shadow">
                     <div class="card-body p-4">
