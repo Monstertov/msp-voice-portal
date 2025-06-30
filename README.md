@@ -11,7 +11,10 @@
 
 A secure web application for MSP (Managed Service Provider) companies to collect audio recordings and text submissions from customers for their managed VoIP solutions. This portal allows customers to easily submit voice recordings, audio files, or text content related to their VoIP service requests.
 
-
+<details>
+  <summary>Preview</summary>
+  <img src="https://tov.monster/host/mspvoiceportal.png" alt="MSP Voice Portal Preview" width="100%" />
+</details>
 
 ## Features
 
