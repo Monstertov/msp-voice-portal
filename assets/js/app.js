@@ -496,8 +496,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 recordingSection.classList.remove('recording');
             }
             
-            // Reset button state
-            recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording')}</span>`;
+            // Reset button state with current language translation
+            const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
+            recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording', currentLang)}</span>`;
             recordButton.classList.remove('btn-danger');
             recordButton.classList.add('btn-primary');
             
@@ -521,8 +522,11 @@ document.addEventListener('DOMContentLoaded', function() {
             recordingStartTime = Date.now();
             recordingDuration = 0;
 
-            // Update button state
-            recordButton.innerHTML = `<i class="fas fa-stop"></i> <span data-i18n="stopRecording">${t('stopRecording')}</span>`;
+            // Get current language
+            const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
+
+            // Update button state with current language translation
+            recordButton.innerHTML = `<i class="fas fa-stop"></i> <span data-i18n="stopRecording">${t('stopRecording', currentLang)}</span>`;
             recordButton.classList.add('btn-danger');
             recordButton.classList.remove('btn-primary');
 
@@ -543,8 +547,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 stream.getTracks().forEach(track => track.stop());
 
-                // Reset button state
-                recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording')}</span>`;
+                // Get current language again
+                const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
+
+                // Reset button state with current language translation
+                recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording', currentLang)}</span>`;
                 recordButton.classList.remove('btn-danger');
                 recordButton.classList.add('btn-primary');
 

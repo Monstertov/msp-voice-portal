@@ -115,11 +115,11 @@ error_reporting($config['error_handling']['error_reporting']);
                             <div id="recordingSection" class="input-section active">
                                 <div class="recording-controls d-flex align-items-center gap-2">
                                     <button type="button" id="startRecording" class="btn btn-primary record-button">
-                                        <i class="fas fa-microphone"></i> <span id="recordButtonText">Start Recording</span>
+                                        <i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">Start Recording</span>
                                     </button>
                                     <audio id="audioPlayback" controls class="ms-2 hidden"></audio>
                                     <button type="button" id="deleteRecording" class="btn btn-danger d-none ms-2">
-                                        <i class="fas fa-trash"></i> <span id="deleteButtonText">Delete Recording</span>
+                                        <i class="fas fa-trash"></i> <span id="deleteButtonText" data-i18n="deleteRecording">Delete Recording</span>
                                     </button>
                                 </div>
                                 <div class="waveform" id="waveform"></div>
