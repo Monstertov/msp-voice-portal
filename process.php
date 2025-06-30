@@ -414,6 +414,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email_subject' => sanitize_input($_POST['email_subject'] ?? 'MSP Voice Portal Request')
         ];
 
+        // Store in session
+        $_SESSION['company_name'] = $data['companyName'];
+        $_SESSION['email'] = $data['contactEmail'];
+        $_SESSION['contact_phone'] = $data['contactPhone'];
+
         $attachment_path = null;
         $inputMethod = $_POST['inputMethod'] ?? '';
 

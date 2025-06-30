@@ -46,16 +46,16 @@ body::before {
     height: 100%;
     background: 
         radial-gradient(circle at 0% 0%, 
-            rgba(13, 110, 253, 0.08) 0%, 
+            rgba(var(--bs-primary), 0.08) 0%, 
             transparent 50%),
         radial-gradient(circle at 100% 0%, 
-            rgba(61, 139, 253, 0.08) 0%, 
+            rgba(var(--bs-primary-light), 0.08) 0%, 
             transparent 50%),
         radial-gradient(circle at 100% 100%, 
-            rgba(109, 168, 253, 0.08) 0%, 
+            rgba(var(--bs-primary-lighter), 0.08) 0%, 
             transparent 50%),
         radial-gradient(circle at 0% 100%, 
-            rgba(11, 94, 215, 0.08) 0%, 
+            rgba(var(--bs-primary-dark), 0.08) 0%, 
             transparent 50%);
     z-index: -1;
     pointer-events: none;
@@ -99,7 +99,7 @@ body::after {
     background-color: var(--bg-dark);
     border-color: var(--primary-color);
     color: var(--text-primary);
-    box-shadow: 0 0 0 0.25rem rgba(114, 137, 218, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
 }
 
 .form-label {
@@ -237,32 +237,28 @@ body::after {
 }
 
 .input-section {
-    opacity: 0;
-    height: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    display: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
 .input-section.active {
-    opacity: 1;
-    height: auto;
-    margin-bottom: 1.5rem;
+    display: block !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
 }
 
 .waveform {
-    width: 100%;
-    height: 100px;
-    background: var(--bg-dark);
-    border-radius: 8px;
-    margin: 10px 0;
-    border: 1px solid var(--border-color);
+    display: none;
 }
 
 .recording-controls {
-    opacity: 0;
-    height: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
 }
 
 .recording .recording-controls {
@@ -452,8 +448,8 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .severity-container .form-check-input:checked + .form-check-label {
-    border-color: #7289da;
-    background-color: rgba(114, 137, 218, 0.05);
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.05);
 }
 
 .severity-container .form-check-input:checked + .form-check-label i,
