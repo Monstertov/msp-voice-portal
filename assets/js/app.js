@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let recordingDuration = 0;
     let recordingTimer;
     let recordedAudioBlob = null;
+    let recordingPrepIndicator = null;
+
+    // Store original button content for restoration
+    let originalRecordButtonContent = recordButton.innerHTML;
 
     // Force visibility of record button
     function ensureRecordButtonVisibility() {
@@ -506,9 +510,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Show preparation indicator inside the button
+        const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
+        recordButton.innerHTML = `<i class='fas fa-spinner fa-spin'></i> <span data-i18n='preparingRecording'>${t('preparingRecording', currentLang)}</span>`;
+        recordButton.disabled = true;
+
         const permissionGranted = await requestMicrophonePermission();
         if (!permissionGranted) {
-            // Re-add the event listener if permission is not granted
+            // Restore button if permission denied
+            recordButton.innerHTML = originalRecordButtonContent;
+            recordButton.disabled = false;
             recordButton.addEventListener('click', recordingClickHandler);
             return;
         }
@@ -516,18 +527,16 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+            // Restore button when recording actually starts
+            recordButton.innerHTML = `<i class="fas fa-stop"></i> <span data-i18n="stopRecording">${t('stopRecording', currentLang)}</span>`;
+            recordButton.classList.add('btn-danger');
+            recordButton.classList.remove('btn-primary');
+            recordButton.disabled = false;
+
             audioChunks = [];
             hasRecording = false;
             recordingStartTime = Date.now();
             recordingDuration = 0;
-
-            // Get current language
-            const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
-
-            // Update button state with current language translation
-            recordButton.innerHTML = `<i class="fas fa-stop"></i> <span data-i18n="stopRecording">${t('stopRecording', currentLang)}</span>`;
-            recordButton.classList.add('btn-danger');
-            recordButton.classList.remove('btn-primary');
 
             // Show recording controls
             recordingSection.classList.add('recording');
@@ -547,14 +556,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 stream.getTracks().forEach(track => track.stop());
 
-                // Get current language again
-                const currentLang = document.querySelector('.language-switcher button.active').dataset.lang;
-
-                // Reset button state with current language translation
-                recordButton.innerHTML = `<i class="fas fa-microphone"></i> <span data-i18n="startRecording">${t('startRecording', currentLang)}</span>`;
-                recordButton.classList.remove('btn-danger');
-                recordButton.classList.add('btn-primary');
-
                 // Re-add the event listener
                 recordButton.addEventListener('click', recordingClickHandler);
             };
@@ -566,9 +567,10 @@ document.addEventListener('DOMContentLoaded', function() {
             recordButton.addEventListener('click', recordingClickHandler);
 
         } catch (err) {
+            // Restore button on error
+            recordButton.innerHTML = originalRecordButtonContent;
+            recordButton.disabled = false;
             showNotification(t('recordingError'), 'error');
-            
-            // Re-add the event listener in case of error
             recordButton.addEventListener('click', recordingClickHandler);
         }
     });

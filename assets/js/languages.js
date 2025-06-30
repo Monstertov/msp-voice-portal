@@ -70,7 +70,8 @@ const translations = {
         submissionSuccess: "Your submission has been received successfully.",
         filesUploaded: "Files uploaded",
         dropAudioFilesOnly: "Please drop audio files only (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
-        submissionSuccess: "Your submission has been received successfully."
+        submissionSuccess: "Your submission has been received successfully.",
+        preparingRecording: "Preparing to record... Please wait."
     },
     nl: {
         // Recording Method
@@ -142,7 +143,8 @@ const translations = {
         errorSending: "Er is een fout opgetreden bij het versturen van uw aanvraag. Probeer het opnieuw.",
         submissionSuccess: "Uw aanvraag is succesvol ontvangen.",
         filesUploaded: "Bestanden geüpload",
-        dropAudioFilesOnly: "Plaats alleen audiobestanden (MP3, WAV, MP4, WebM, OGG, AAC, M4A)"
+        dropAudioFilesOnly: "Plaats alleen audiobestanden (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
+        preparingRecording: "Opname wordt voorbereid... Even geduld aub."
     }
 };
 
