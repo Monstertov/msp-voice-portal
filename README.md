@@ -9,7 +9,7 @@
 [![CSS3](https://custom-icon-badges.demolab.com/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![Font Awesome](https://custom-icon-badges.demolab.com/badge/Font_Awesome-339AF0?logo=fontawesome&logoColor=white)](https://fontawesome.com/)
 
-A secure web application for MSP (Managed Service Provider) companies to collect audio recordings and text submissions from customers for their managed VoIP solutions. This portal allows customers to easily submit voice recordings, audio files, or text content related to their VoIP service requests.
+A secure, modern and mobile friendly web application for IT MSP (Managed Service Provider) companies to collect audio recordings and text submissions from customers for their managed VoIP solutions. This portal allows customers to easily submit voice recordings, audio files, or text content related to their VoIP service requests.
 
 <details>
   <summary>Preview</summary>
