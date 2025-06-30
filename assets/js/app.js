@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let recordingStartTime;
     let recordingDuration = 0;
     let recordingTimer;
+    let recordedAudioBlob = null;
 
     // Force visibility of record button
     function ensureRecordButtonVisibility() {
@@ -331,27 +332,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Check input method specific validations
         const selectedMethod = document.querySelector('input[name="inputMethod"]:checked').value;
-        const audioFile = document.getElementById('audioFile');
+        const formData = new FormData(form);
         
-        switch(selectedMethod) {
-            case 'record':
-                if (!hasRecording) {
-                    showNotification(t('recordingRequired'), 'error');
-                    return;
-                }
-                break;
-            case 'upload':
-                if (!audioFile.files.length) {
-                    showNotification(t('fileRequired'), 'error');
-                    return;
-                }
-                break;
-            case 'text':
-                if (!textContent.value.trim()) {
-                    showNotification(t('textRequired'), 'error');
-                    return;
-                }
-                break;
+        if (selectedMethod === 'record') {
+            if (!hasRecording || !recordedAudioBlob) {
+                showNotification(t('recordingRequired'), 'error');
+                return;
+            }
+            // Remove any existing audioFile from FormData
+            formData.delete('audioFile');
+            // Append the recorded audio as a file
+            formData.append('audioFile', recordedAudioBlob, 'recording.wav');
+        } else if (selectedMethod === 'upload') {
+            if (!audioFile.files.length) {
+                showNotification(t('fileRequired'), 'error');
+                return;
+            }
+        } else if (selectedMethod === 'text') {
+            if (!textContent.value.trim()) {
+                showNotification(t('textRequired'), 'error');
+                return;
+            }
         }
         
         const severity = document.querySelector('input[name="severity"]:checked').value;
@@ -377,8 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${t('sending')}`;
 
         try {
-            const formData = new FormData(form);
-            
             const response = await fetch('process.php', {
                 method: 'POST',
                 body: formData
@@ -540,9 +539,10 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 if (audioBlob.size > 0) {
                     hasRecording = true;
+                    recordedAudioBlob = audioBlob;
                     createAudioPlayer(audioBlob);
                 }
                 stream.getTracks().forEach(track => track.stop());
