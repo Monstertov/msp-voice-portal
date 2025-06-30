@@ -2,24 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.9.3-beta] - 2025-06-30
-
-### Added
-- Drag & drop file upload functionality
-
-### Changed
-- Enhanced user experience with intuitive drag & drop interface
-- Improved file upload workflow with automatic method selection
-- Minor bug fixes
-
 ## [0.9.2-beta] - 2025-06-30
 
 ### Added
+- Primary accent color is now configurable via `config.php`
+- Drag & drop file upload functionality
 - Support email dynamically loaded from configuration using PHP
 - Mailto functionality works in both English and Dutch languages
 
 ### Changed
 - Updated support contact display to show actual email address instead of generic "support" text
+- Enhanced user experience with intuitive drag & drop interface
+- Improved file upload workflow with automatic method selection
+- Minor bug fixes
 
 ## [0.9.1-beta] - 2025-06-30
 
