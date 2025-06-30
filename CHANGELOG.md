@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.9.2-beta] - 2025-06-30
+## [0.9.2-beta] - 2025-07-01
 
 ### Added
 - Primary accent color is now configurable via `config.php`
