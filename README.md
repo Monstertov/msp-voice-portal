@@ -152,7 +152,7 @@ const translations = {
 - [x] Remember company name/email from previous submissions
 - [x] Play back recordings before submission
 - [ ] ElevenLabs integration
-
+- [ ] Custom style audio playback 
 
 ### Technical Improvements
 - [ ] Configurable max recording duration with warnings
