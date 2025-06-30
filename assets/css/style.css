@@ -751,4 +751,11 @@ footer a:hover {
         margin-left: 0 !important;
         margin-right: 0 !important;
     }
+}
+
+#audioPlayback::-webkit-media-controls-volume-slider {
+    filter: invert(1) brightness(1.2);
+}
+#audioPlayback::-webkit-media-controls-mute-button {
+    filter: invert(1) brightness(1.2);
 } 
