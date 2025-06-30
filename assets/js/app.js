@@ -393,6 +393,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Manually clear fields that should not be remembered
                 textContent.value = '';
                 audioFile.value = ''; // Clear file input
+                const fileNameSpan = document.getElementById('fileName');
+                if (fileNameSpan) fileNameSpan.textContent = '';
                 form.classList.remove('was-validated');
                 hasRecording = false;
                 
