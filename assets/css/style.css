@@ -450,18 +450,18 @@ input[type="file"].custom-file-input {
 
 .severity-container .form-check-input:checked + .form-check-label i,
 .severity-container .form-check-input:checked + .form-check-label .severity-description {
-    color: #7289da;
+    color: var(--primary-color);
 }
 
 .severity-container .form-check-label:hover {
-    border-color: #7289da;
+    border-color: var(--primary-color);
     transform: translateY(-2px);
-    background-color: rgba(114, 137, 218, 0.02);
+    background-color: rgba(var(--primary-color-rgb), 0.02);
 }
 
 .severity-container .form-check-label:hover i,
 .severity-container .form-check-label:hover .severity-description {
-    color: #7289da;
+    color: var(--primary-color);
 }
 
 /* Form Controls */
