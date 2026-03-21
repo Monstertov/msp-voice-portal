@@ -44,8 +44,6 @@ Contributions are welcome. [Open an issue](https://github.com/Monstertov/msp-voi
 
 ## TODO
 
-- [ ] Get a demo up and running
-
 ### Features
 - [ ] Multiple file/recording upload support
 - [x] Additional file format support (OGG, M4A, etc.)
