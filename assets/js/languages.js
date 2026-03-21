@@ -71,7 +71,6 @@ const translations = {
         submissionSuccess: "Your submission has been received successfully.",
         filesUploaded: "Files uploaded",
         dropAudioFilesOnly: "Please drop audio files only (MP3, WAV, MP4, WebM, OGG, AAC, M4A)",
-        submissionSuccess: "Your submission has been received successfully.",
         preparingRecording: "Preparing to record... Please wait.",
         maxDurationWarning: "Maximum recording duration: {duration} seconds.",
         maxDurationReached: "Maximum recording time reached. Recording stopped."
@@ -218,6 +217,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Set default language
-    setLanguage('en');
 }); 

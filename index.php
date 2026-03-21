@@ -61,7 +61,7 @@ error_reporting($config['error_handling']['error_reporting']);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
 </head>
-<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>" style="--primary-color: <?php echo htmlspecialchars($config['primary_color']); ?>; --primary-hover: <?php echo htmlspecialchars($config['primary_hover']); ?>;">
+<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>" data-default-lang="<?php echo htmlspecialchars($config['default_language']); ?>" style="--primary-color: <?php echo htmlspecialchars($config['primary_color']); ?>; --primary-hover: <?php echo htmlspecialchars($config['primary_hover']); ?>;">
     <div class="container py-2">
         <div class="row justify-content-center">
             <div class="col-md-8">

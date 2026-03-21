@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return null;
     }
 
-    // Initialize language from cookie or default to English
-    const savedLang = getCookie('user_language') || 'en';
+    // Initialize language from cookie, config default, or fallback to English
+    const savedLang = getCookie('user_language') || document.body.dataset.defaultLang || 'en';
     setLanguage(savedLang);
     
     // Update active button state
