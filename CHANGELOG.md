@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [0.9.3-beta] - 2026-03-21
 
 ### Fixed
+- CSP `connect-src` directive now includes `blob:` and `cdnjs.cloudflare.com`, resolving browser console violations when devtools fetch Bootstrap/Font Awesome source maps
+- Removed duplicate `media-src` and `connect-src` directives in `index.php` that were silently discarding the intended values (CSP only uses the first occurrence of each directive)
 - Default language from `config.php` now correctly applies on first page load instead of always defaulting to English
 - Audio recording on iOS Safari and other mobile browsers now works correctly — MIME type is detected at runtime (`audio/mp4` on iOS, `audio/webm` on Android/desktop) instead of being hardcoded to WAV
 - Recorded audio is uploaded with the correct file extension matching its actual format, fixing server-side validation failures on mobile recordings
