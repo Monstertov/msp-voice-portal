@@ -13,9 +13,6 @@ $csp_parts = [];
 foreach ($config['security_headers']['content_security_policy'] as $directive => $sources) {
     $csp_parts[] = $directive . ' ' . implode(' ', $sources);
 }
-// Add media-src and connect-src for recording
-$csp_parts[] = "media-src 'self' blob:";
-$csp_parts[] = "connect-src 'self' blob:";
 header("Content-Security-Policy: " . implode('; ', $csp_parts));
 
 // Add additional security headers from config

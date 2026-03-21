@@ -40,7 +40,7 @@ return [
             'style-src' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
             'img-src' => ["'self'", 'data:', 'https:'],
             'font-src' => ["'self'", 'cdnjs.cloudflare.com'],
-            'connect-src' => ["'self'"],
+            'connect-src' => ["'self'", 'blob:', 'cdnjs.cloudflare.com'],
             'media-src' => ["'self'", 'blob:'],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
