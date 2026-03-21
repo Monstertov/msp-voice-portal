@@ -28,7 +28,7 @@ return [
 
     // MSP Support Contact Configuration
     'support' => [
-        'email' => 'rob@monstertov.nl', // MSP support contact email
+        'email' => 'support@example.com', // MSP support contact email
         'name' => 'MSP Support Team' // MSP support team name
     ],
 
