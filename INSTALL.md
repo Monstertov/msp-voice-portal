@@ -1,411 +1,348 @@
-# Installation Guide for MSP Voice Portal
+# Installation Guide — MSP Voice Portal
 
-This guide provides simple steps to get your MSP Voice Portal up and running. You don't need to be a web development expert to follow these instructions.
+## Quick Start
 
-## Quick Start (TL;DR)
+```bash
+git clone https://github.com/Monstertov/msp-voice-portal
+cd msp-voice-portal
+composer install
+cp config.example.php config.php
+# Edit config.php with your SMTP and support email settings
+mkdir -p uploads logs
+chmod 755 uploads logs
+```
 
-1. **Download** the project files from GitHub
-2. **Configure** `config.php` with your SMTP and support email settings
-3. **Create** an `uploads` folder and set proper permissions
-4. **Access** the portal via your web browser
+Then configure your web server to point to the project root and ensure HTTPS is active.
 
-For detailed instructions, continue reading below.
+---
 
-## 1. Requirements
+## Requirements
 
-Before you start, make sure you have these installed on your server:
+| Requirement | Minimum |
+|---|---|
+| PHP | 8.0 or newer |
+| PHP extensions | `fileinfo`, `json`, `session` |
+| Web server | Apache 2.4+ (with `mod_rewrite`, `mod_headers`) or Nginx |
+| Composer | Required (manages PHPMailer) |
+| HTTPS | Required — microphone access and secure session cookies need a valid TLS certificate |
 
-*   **PHP:** Version 7.4 or newer.
-*   **Web Server:** Apache or Nginx (Plesk, cPanel, or DirectAdmin hosting environments work perfectly)
-*   **SMTP Server:** For sending email notifications (e.g., Postfix, Sendmail, or an external service like SendGrid)
+---
 
-## 2. Get the Code
+## 1. Get the Code
 
-You have two options to obtain the project files:
-
-### Option 1: Download ZIP
-1. Go to the GitHub repository: [https://github.com/Monstertov/msp-voice-portal](https://github.com/Monstertov/msp-voice-portal)
-2. Click the green "Code" button
-3. Select "Download ZIP"
-4. Extract the ZIP file to your web server's directory
-
-### Option 2: Git Clone
+**Option A — Git clone (recommended):**
 ```bash
 git clone https://github.com/Monstertov/msp-voice-portal
 cd msp-voice-portal
 ```
 
-## 3. Install Dependencies
+**Option B — Download ZIP:**
+1. Go to the [GitHub repository](https://github.com/Monstertov/msp-voice-portal)
+2. Click **Code → Download ZIP**
+3. Extract to your web server directory
 
-### Composer (Optional)
-While Composer can be used, it's not required. You can manually download PHPMailer:
+---
 
-1. **Composer Method (Optional):**
-   ```bash
-   composer install
-   ```
+## 2. Install Dependencies
 
-2. **Manual PHPMailer Download:**
-   - Visit [PHPMailer GitHub Releases](https://github.com/PHPMailer/PHPMailer/releases)
-   - Download the latest version
-   - Extract the PHPMailer files into a `vendor/phpmailer` directory in your project
+Composer is required. It installs PHPMailer and the autoloader.
 
-## 4. Configure the Portal
+```bash
+composer install --no-dev
+```
 
-All settings are in a file called `config.php`. We provide an example file to get you started.
+If Composer is not installed on your server, install it first:
+```bash
+curl -sS https://getcomposer.org/installer | php
+php composer.phar install --no-dev
+```
 
-1.  **Copy the example file:**
-    ```bash
-    cp config.example.php config.php
-    ```
-2.  **Edit `config.php`:** Open the `config.php` file in a text editor. You'll need to update settings like:
-    *   **SMTP details:** For sending emails (server, username, password, etc.).
-    *   **File upload limits:** Match this with your server's PHP settings (see next step).
-    *   **Security settings:** Adjust as needed.
-    *   **Primary Color:** Set the hexadecimal color code for the primary accent color (e.g., `#7289da`).
+---
 
-    *Example snippet from `config.php` (your values will differ):*
-    ```php
-    <?php
-    // SMTP Configuration
-    define('SMTP_HOST', 'your.smtp.server.com');
-    define('SMTP_PORT', 587);
-    define('SMTP_USERNAME', 'your_smtp_username');
-    define('SMTP_PASSWORD', 'your_smtp_password');
-    define('SMTP_FROM_EMAIL', 'noreply@yourdomain.com');
-    define('SMTP_FROM_NAME', 'MSP Voice Portal');
+## 3. Configure the Portal
 
-    // File Upload Settings
-    define('MAX_FILE_SIZE', 10 * 1024 * 1024); // 10 MB
-    ?>
-    ```
+Copy the example config and edit it:
 
-## 5. Set Up Uploads Folder
+```bash
+cp config.example.php config.php
+```
 
-The portal needs a place to store uploaded audio files.
+Open `config.php` and update the following sections. The file uses a PHP return-array format:
 
-1.  **Create the folder:**
-    ```bash
-    mkdir uploads
-    ```
-2.  **Set permissions:** Your web server needs permission to write to this folder.
-    ```bash
-    chmod 755 uploads
-    chown www-data:www-data uploads # Replace 'www-data:www-data' with your web server user/group (e.g., 'nginx:nginx' for Nginx)
-    ```
+```php
+<?php
+return [
+    'email' => [
+        'smtp_host'     => 'smtp.yourprovider.com',
+        'smtp_port'     => 587,          // 587 for TLS, 465 for SSL, 25 for unauthenticated relay
+        'smtp_username' => 'you@example.com', // Leave empty for unauthenticated relay
+        'smtp_password' => 'yourpassword',    // Leave empty for unauthenticated relay
+        'smtp_secure'   => 'tls',        // 'tls', 'ssl', or '' for no encryption
+        'from'          => 'noreply@yourdomain.com',
+        'from_name'     => 'MSP Voice Portal',
+        'to'            => 'support@yourdomain.com', // Where submissions are delivered
+    ],
 
-    **For Plesk hosting:**
-    ```bash
-    chmod 755 uploads
-    chown psaserv:psaserv uploads
-    # Or if using Apache with Plesk:
-    chown apache:apache uploads
-    ```
-    > **Note:** For detailed Plesk permission setup, see the [Plesk documentation](https://docs.plesk.com/en-US/obsidian/administrator-guide/web-hosting/web-sites-and-domains/website-permissions.73385/).
+    'application_title' => 'MSP Voice Portal',
+    'primary_color'     => '#7289da', // Hex accent colour
+    'primary_hover'     => '#5b6eae', // Hover shade of the accent colour
+    'default_language'  => 'nl',      // 'en' or 'nl'
+    'require_notes'     => true,
+    'recording_max_duration' => 60,   // Maximum recording length in seconds
 
-    **For DirectAdmin hosting:**
-    ```bash
-    chmod 755 uploads
-    chown apache:apache uploads
-    # Or if using a specific user account:
-    chown yourusername:apache uploads
-    ```
-    > **Note:** For DirectAdmin-specific setup, refer to the [DirectAdmin documentation](https://www.directadmin.com/features.php?id=1838) and [DirectAdmin forums](https://forum.directadmin.com/) for permission configuration.
+    'support' => [
+        'email' => 'support@yourdomain.com', // Address shown to users in the portal
+        'name'  => 'MSP Support Team',
+    ],
 
-    **For cPanel hosting:**
-    ```bash
-    chmod 755 uploads
-    chown yourusername:yourusername uploads
-    # The web server will run as your username in cPanel
-    ```
-    > **Note:** For cPanel file permission setup, see the [cPanel File Manager documentation](https://kb.hosting.com/docs/file-permissions) for detailed instructions on setting permissions through the File Manager interface.
+    // ... security, rate limiting, CSRF, upload settings (see config.example.php for all options)
+];
+```
 
-    **Note:** If you're unsure about your web server user, check your hosting provider's documentation or contact their support. The web server user is typically `www-data`, `apache`, `nginx`, or your hosting account username.
+> **Tip:** The full list of options with descriptions is in `config.example.php`.
 
-## 6. Configure Your Web Server (Apache/Nginx)
+---
 
-You need to tell your web server where the portal files are. This usually involves creating a Virtual Host entry (Apache) or a server block (Nginx).
+## 4. Create Required Directories
 
-*Example for Apache Virtual Host:*
+```bash
+mkdir -p uploads logs
+chmod 755 uploads logs
+```
+
+Set ownership to your web server user:
+
+```bash
+# Apache on Debian/Ubuntu
+chown www-data:www-data uploads logs
+
+# Apache on RHEL/CentOS
+chown apache:apache uploads logs
+
+# Plesk
+chown psaserv:psaserv uploads logs
+
+# cPanel / DirectAdmin — your account user owns the files
+chown yourusername:yourusername uploads logs
+```
+
+---
+
+## 5. Set Up .htaccess Files
+
+The `.htaccess` files are **not included in the repository** (they are gitignored because they contain server-specific configuration). You must create them manually.
+
+### Project root — `/.htaccess`
+
+Create `/path/to/msp-voice-portal/.htaccess` with the following content:
+
 ```apache
-<VirtualHost *:80>
-    ServerName your-domain.com
-    DocumentRoot /path/to/your/msp-voice-portal
+# Enable Rewrite Engine
+RewriteEngine On
 
-    <Directory /path/to/your/msp-voice-portal>
-        Options Indexes FollowSymLinks
+# --- Block access to sensitive files and directories ---
+RewriteRule ^\.git - [F,L]
+RewriteRule ^\.gitignore$ - [F,L]
+RewriteRule ^\.gitattributes$ - [F,L]
+RewriteRule ^\.vscode - [F,L]
+RewriteRule ^\.env - [F,L]
+RewriteRule ^composer\.lock$ - [F,L]
+RewriteRule ^package\.json$ - [F,L]
+RewriteRule ^package-lock\.json$ - [F,L]
+RewriteRule ^logs/.*\.log$ - [F,L]
+RewriteRule ^config\.php$ - [F,L]
+RewriteRule ^\.htaccess$ - [F,L]
+RewriteRule ^test\.php$ - [F,L]
+RewriteRule ^reset\.php$ - [F,L]
+
+# --- Redirect HTTP to HTTPS ---
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# --- Security Headers ---
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; style-src-elem 'self' cdnjs.cloudflare.com; font-src 'self' cdnjs.cloudflare.com; img-src 'self' data: blob: https://flagcdn.com; media-src 'self' blob:; connect-src 'self' blob: cdnjs.cloudflare.com; object-src 'none'; form-action 'self'; base-uri 'self';"
+Header always set X-Frame-Options "DENY"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(self)"
+Header unset X-Powered-By
+Header unset Server
+```
+
+### Uploads directory — `/uploads/.htaccess`
+
+Create `/path/to/msp-voice-portal/uploads/.htaccess` to prevent execution of any uploaded scripts:
+
+```apache
+# Deny execution of server-side scripts in the uploads directory
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|pht|asp|aspx|cgi|pl|py|sh)$">
+    Require all denied
+</FilesMatch>
+Options -ExecCGI -Indexes
+```
+
+> **Why two .htaccess files?** The root one secures the application. The uploads one provides a second line of defence: even if a malformed file somehow passes validation, Apache will refuse to execute it.
+
+---
+
+## 6. Configure Your Web Server
+
+### Apache Virtual Host
+
+```apache
+<VirtualHost *:443>
+    ServerName your-domain.com
+    DocumentRoot /path/to/msp-voice-portal
+
+    <Directory /path/to/msp-voice-portal>
+        Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    SSLEngine on
+    SSLCertificateFile    /path/to/fullchain.pem
+    SSLCertificateKeyFile /path/to/privkey.pem
+
+    ErrorLog  ${APACHE_LOG_DIR}/msp-voice-portal-error.log
+    CustomLog ${APACHE_LOG_DIR}/msp-voice-portal-access.log combined
 </VirtualHost>
 ```
 
-## 7. Security Configuration: .htaccess
-
-Create a `.htaccess` file in your project root with the following security-focused configuration:
-
-```apache
-# Disable directory browsing
-Options -Indexes
-
-# Protect sensitive files
-<FilesMatch "^(config\.php|\.htaccess|\.env)$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
-
-# Block access to potentially sensitive directories
-<DirectoryMatch "^.+(vendor|uploads|logs)$">
-    Order Allow,Deny
-    Deny from all
-</DirectoryMatch>
-
-# Prevent file upload of potentially dangerous file types
-<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|pht|asp|aspx|exe|pl|cgi|sh|bash)$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
-
-# Prevent viewing of log files
-<FilesMatch "\.log$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
-
-# Protect against SQL injection and other attacks
-RewriteEngine On
-RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
-RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
-RewriteRule ^(.*)$ index.php [F,L]
-
-# Prevent clickjacking
-Header always append X-Frame-Options SAMEORIGIN
-
-# Enable XSS protection in browsers
-Header set X-XSS-Protection "1; mode=block"
-
-# Prevent MIME type sniffing
-Header set X-Content-Type-Options nosniff
+Make sure `mod_rewrite` and `mod_headers` are enabled:
+```bash
+a2enmod rewrite headers
+systemctl restart apache2
 ```
 
-## 8. Adjust PHP Upload Limits (Important!)
+### Nginx
 
-If you plan to allow larger file uploads, you might need to adjust your PHP settings.
+```nginx
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+    root /path/to/msp-voice-portal;
+    index index.php;
 
-*Example for `php.ini`:*
+    ssl_certificate     /path/to/fullchain.pem;
+    ssl_certificate_key /path/to/privkey.pem;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    # Block sensitive files
+    location ~* ^/(config\.php|\.htaccess|\.git|logs/|vendor/) {
+        deny all;
+    }
+
+    # Block script execution in uploads
+    location ~* ^/uploads/.*\.(php|phtml|cgi|pl|py|sh)$ {
+        deny all;
+    }
+}
+```
+
+---
+
+## 7. Adjust PHP Upload Limits
+
+The portal allows files up to 10 MB by default. Make sure your PHP settings match. Create or edit a `.user.ini` in the project root:
+
 ```ini
-upload_max_filesize = 20M
-post_max_size = 24M
+upload_max_filesize = 10M
+post_max_size = 12M
+max_execution_time = 60
 ```
 
-## 9. Customizing Branding (Logo, Favicon)
+Or set these in your global `php.ini` / hosting panel.
 
-To customize the portal with your MSP's branding, you can replace the default logo and favicon files located in the `assets/` directory.
+---
 
-*   **Logo:** Replace `assets/logo-512x512.svg` with your own SVG logo. Ensure your logo is also 512x512 pixels for optimal display.
-*   **Favicon:** Replace the various `favicon.ico`, `favicon.svg`, `apple-touch-icon.png`, `favicon-96x96.png`, `web-app-manifest-192x192.png`, and `web-app-manifest-512x512.png` files with your own. It's recommended to use a favicon generator to create all necessary sizes from a single source image.
+## 8. Branding
 
-## 10. Access the Portal
+Replace the default logo and favicon files in `assets/`:
 
-Once all steps are complete, open your web browser and navigate to the domain or IP address where you configured the portal.
+| File | Purpose |
+|---|---|
+| `assets/logo-512x512.svg` | Main logo shown in the portal header |
+| `assets/favicon.svg` | Browser tab icon (SVG) |
+| `assets/favicon.ico` | Browser tab icon (legacy) |
+| `assets/favicon-96x96.png` | 96×96 PNG favicon |
+| `assets/apple-touch-icon.png` | iOS home screen icon (180×180) |
+| `assets/web-app-manifest-192x192.png` | Android home screen icon |
+| `assets/web-app-manifest-512x512.png` | Android splash icon |
 
-If you encounter any issues, check your web server's error logs and the `logs/` directory within the portal for more details.
+Use a favicon generator to produce all sizes from a single source image.
 
-**Note:** Always keep your software updated and follow security best practices!
-
-## Configuring Max Recording Duration
-
-You can set the maximum allowed duration for audio recordings (in seconds) in your `config.php`:
-
+Set your brand colour in `config.php`:
 ```php
-// config.php
-'recording_max_duration' => 60, // 60 seconds (default)
+'primary_color' => '#7289da', // Main accent (buttons, highlights)
+'primary_hover' => '#5b6eae', // Hover state
 ```
 
-- The frontend will warn users of the limit before recording starts.
-- If the limit is reached, recording will automatically stop and a warning will be shown.
+---
 
-## Setting Up Mail Receiver and Support Email
+## 9. Verify the Installation
 
-In your `config.php`, you can configure where form submissions are sent and what email address is shown to users for support. These can be the same or different addresses, depending on your MSP's workflow.
+1. Open your domain in a browser — the portal should load in your configured default language
+2. Try recording a short audio clip and submitting the form
+3. Confirm the submission email arrives
+4. Open browser devtools (F12 → Console) — there should be no CSP errors or JS errors
 
-### Example:
-```php
-// config.php
-'email' => [
-    'to' => 'receiver@example.com', // The email address that receives form submissions
-    // ... other SMTP settings ...
-],
-
-'support' => [
-    'email' => 'support@example.com', // The support contact email shown to users
-    'name' => 'MSP Support Team'
-],
-```
-
-- **Mail Receiver (`email.to`)**: This is the address that will receive all form submissions (audio, text, etc.).
-- **Support Email (`support.email`)**: This is the address shown to users in the portal for support/contact. It can be the same as the receiver, or a different address (e.g., a helpdesk or ticketing system).
-
-**Tip:** If you want all notifications and support requests to go to the same address, set both to the same value. If you want to separate customer support from form submissions, use different addresses.
+---
 
 ## Troubleshooting
 
-If you encounter issues during installation, here are common problems and their solutions:
+### Upload fails or file upload error
 
-### Problem: "Upload failed" or "File upload error"
+- Check `uploads/` exists and is writable by the web server user
+- Verify PHP upload limits (`upload_max_filesize`, `post_max_size`) match or exceed your `config.php` `max_file_size`
+- Test with a small file (under 1 MB) first
+- Check `logs/process_errors.log` when `debug.enabled` is `true` in config
 
-**Symptoms:**
-- Users can't upload audio files
-- Error messages about file uploads
-- Files appear to upload but don't save
+### Email not sending / SMTP error
 
-**Solutions:**
-1. **Check uploads folder permissions:**
-   ```bash
-   ls -la uploads/
-   # Should show: drwxr-xr-x (755 permissions)
-   ```
+- Verify `smtp_host`, `smtp_port`, `smtp_username`, and `smtp_password` in config
+- Port 587 requires `smtp_secure = 'tls'`; port 465 requires `smtp_secure = 'ssl'`; port 25 unauthenticated relay requires `smtp_secure = ''` and empty credentials
+- Some hosts block outbound SMTP — check with your provider or use a relay service (SendGrid, Mailgun, etc.)
+- Enable `debug.enabled = true` temporarily to log SMTP errors to `logs/process_errors.log`
 
-2. **Verify web server user ownership:**
-   ```bash
-   ls -la uploads/
-   # Should show your web server user (www-data, apache, etc.)
-   ```
+### Microphone / recording not working
 
-3. **Check PHP upload limits in php.ini:**
-   ```ini
-   upload_max_filesize = 20M
-   post_max_size = 24M
-   max_execution_time = 300
-   ```
+- HTTPS is required — microphone access is blocked on plain HTTP
+- Check browser permissions: click the lock icon in the address bar
+- iOS Safari requires iOS 14.5+ for WebRTC recording
+- Android Chrome and all modern desktop browsers are supported
 
-4. **Test with a small file first** (under 1MB) to isolate size-related issues.
+### Page not loading / 500 error
 
-### Problem: "Email not sending" or "SMTP error"
+- Check PHP version: `php -v` (needs 8.0+)
+- Verify `vendor/` exists and PHPMailer is installed (`composer install`)
+- Confirm `AllowOverride All` is set in your Apache config so `.htaccess` is read
+- Check web server error log (`/var/log/apache2/error.log` or `/var/log/nginx/error.log`)
+- Temporarily set `display_errors = true` in `config.php` `error_handling` section
 
-**Symptoms:**
-- Form submissions don't generate email notifications
-- SMTP connection errors
-- Emails go to spam folder
+### Language shows English despite config setting `nl`
 
-**Solutions:**
-1. **Verify SMTP settings in config.php:**
-   - Check host, port, username, and password
-   - Ensure SSL/TLS settings match your provider
+- This happens when a `user_language` cookie from a previous visit overrides the config default
+- Clear cookies for the domain and reload
+- New visitors without a cookie will see the language set in `config.php` → `default_language`
 
-2. **Test SMTP connection:**
-   ```php
-   // Add this to a test file to verify SMTP
-   require 'vendor/autoload.php';
-   $mail = new PHPMailer\PHPMailer\PHPMailer(true);
-   $mail->isSMTP();
-   $mail->Host = 'your.smtp.server.com';
-   $mail->Port = 587;
-   $mail->SMTPAuth = true;
-   $mail->Username = 'your_username';
-   $mail->Password = 'your_password';
-   ```
+### CSP violations in browser console
 
-3. **Check hosting provider's SMTP restrictions** - some hosts block external SMTP
+- Ensure the root `.htaccess` is in place and `mod_headers` is enabled
+- If you load resources from additional domains (e.g. a custom font CDN), add them to the relevant CSP directives in your `.htaccess` and in `config.php` → `security_headers.content_security_policy`
 
-4. **Use alternative email services** like SendGrid, Mailgun, or Gmail SMTP
+### Still having issues?
 
-### Problem: "Recording not working" or "Microphone access denied"
-
-**Symptoms:**
-- Audio recording button doesn't work
-- Browser shows microphone permission errors
-- Recording starts but stops immediately
-
-**Solutions:**
-1. **Ensure HTTPS is enabled** - modern browsers require secure connections for microphone access
-
-2. **Check browser permissions:**
-   - Click the camera/microphone icon in the address bar
-   - Ensure microphone access is allowed
-
-3. **Test in different browsers** - Chrome, Firefox, Safari, Edge
-
-4. **Check for browser extensions** that might block microphone access
-
-### Problem: "Page not loading" or "500 Internal Server Error"
-
-**Symptoms:**
-- Portal doesn't load in browser
-- Server error messages
-- Blank white page
-
-**Solutions:**
-1. **Check PHP version compatibility:**
-   ```bash
-   php -v
-   # Should be 7.4 or higher
-   ```
-
-2. **Verify file permissions:**
-   ```bash
-   ls -la *.php
-   # Should be readable by web server (644)
-   ```
-
-3. **Check web server error logs:**
-   - Apache: `/var/log/apache2/error.log`
-   - Nginx: `/var/log/nginx/error.log`
-   - cPanel: Check error logs in hosting panel
-
-4. **Enable error display temporarily** in config.php:
-   ```php
-   'error_handling' => [
-       'display_errors' => true, // Temporarily enable for debugging
-       'log_errors' => true,
-   ]
-   ```
-
-### Problem: "Language not switching" or "Translation errors"
-
-**Symptoms:**
-- Language switcher doesn't work
-- Mixed languages displayed
-- Missing translations
-
-**Solutions:**
-1. **Clear browser cache** and cookies
-2. **Check JavaScript console** for errors (F12 → Console)
-3. **Verify language files** are properly loaded
-4. **Test with different browsers** to isolate browser-specific issues
-
-### Problem: "Security headers causing issues"
-
-**Symptoms:**
-- Mixed content warnings
-- External resources not loading
-- CSP (Content Security Policy) violations
-
-**Solutions:**
-1. **Review security headers** in config.php
-2. **Add missing domains** to CSP directives
-3. **Check browser console** for specific CSP violations
-4. **Temporarily disable security headers** for testing:
-   ```php
-   'security_headers' => [
-       'content_security_policy' => [
-           'default-src' => ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-           // Add other domains as needed
-       ]
-   ]
-   ```
-
-### Still Having Issues?
-
-If you're still experiencing problems:
-
-1. **Check the logs directory** for detailed error messages
-2. **Review your hosting provider's documentation** for specific requirements
-3. **Contact your hosting provider's support** for server-level issues
-4. **Open an issue on GitHub** with detailed error messages and your configuration (remove sensitive data)
-
-**Remember:** Always keep your software updated and follow security best practices!
+1. Check `logs/process_errors.log` (enable `debug.enabled = true` in config temporarily)
+2. [Open an issue on GitHub](https://github.com/Monstertov/msp-voice-portal/issues) with your error log (remove sensitive data before posting)
