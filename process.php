@@ -10,11 +10,14 @@ header("X-Frame-Options: DENY");
 header("X-XSS-Protection: 1; mode=block");
 header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: strict-origin-when-cross-origin");
-header("Content-Security-Policy: default-src 'self'");
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure'   => true,
+        'cookie_samesite' => 'Strict',
+    ]);
 }
 
 // Function to generate CSRF token
@@ -31,10 +34,8 @@ function validate_csrf_token($token) {
 }
 
 // Function to check rate limiting
-function check_rate_limit($ip) {
+function check_rate_limit($ip, $max_requests = 10, $time_window = 3600) {
     $rate_limit_file = sys_get_temp_dir() . '/rate_limit_' . md5($ip);
-    $time_window = 3600; // 1 hour
-    $max_requests = 10; // Maximum requests per hour
 
     if (file_exists($rate_limit_file)) {
         $data = json_decode(file_get_contents($rate_limit_file), true);
@@ -299,7 +300,7 @@ function send_email($config, $data, $attachment_path = null) {
 
         // Content
         $mail->isHTML(true);
-        $mail->Subject = generate_email_subject($_POST['severity'], $data['companyName']);
+        $mail->Subject = generate_email_subject($data['severity'], $data['companyName']);
         
         // Build email body
         $body = "<h2>New MSP Voice Portal Recording Submission</h2>";
@@ -353,8 +354,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Invalid security token');
         }
 
-        // Check rate limiting
-        check_rate_limit($_SERVER['REMOTE_ADDR']);
+        // Check rate limiting (reads limits from config)
+        if ($config['rate_limit']['enabled']) {
+            check_rate_limit(
+                $_SERVER['REMOTE_ADDR'],
+                (int) $config['rate_limit']['max_requests'],
+                (int) $config['rate_limit']['time_window']
+            );
+        }
 
         // Get current language from POST, cookie, or config default
         $currentLang = $_POST['lang'] ?? $_COOKIE['user_language'] ?? $config['default_language'];
@@ -403,9 +410,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception($translations[$currentLang]['invalid_email']);
         }
 
+        // Whitelist inputMethod before any use
+        $allowed_methods = ['record', 'upload', 'text'];
+        $raw_method = $_POST['inputMethod'] ?? '';
+        if (!in_array($raw_method, $allowed_methods, true)) {
+            throw new Exception('Invalid input method');
+        }
+
+        // Whitelist severity before any use
+        $allowed_severities = ['normal', 'high', 'emergency'];
+        $severity = in_array($_POST['severity'] ?? '', $allowed_severities, true)
+            ? $_POST['severity']
+            : 'normal';
+
         // Prepare data with enhanced sanitization
         $data = [
-            'inputMethod' => sanitize_input($_POST['inputMethod'] ?? ''),
+            'inputMethod' => sanitize_input($raw_method),
+            'severity'    => $severity, // already whitelisted above
             'companyName' => sanitize_input($_POST['companyName']),
             'contactEmail' => sanitize_input($_POST['contactEmail']),
             'contactPhone' => sanitize_input($_POST['contactPhone'] ?? ''),
@@ -420,7 +441,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['contact_phone'] = $data['contactPhone'];
 
         $attachment_path = null;
-        $inputMethod = $_POST['inputMethod'] ?? '';
+        $inputMethod = $data['inputMethod']; // use already-sanitized value
 
         // Handle file upload with enhanced security
         if (isset($_FILES['audioFile']) && $_FILES['audioFile']['error'] === UPLOAD_ERR_OK) {

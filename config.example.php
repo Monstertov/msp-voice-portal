@@ -22,6 +22,7 @@ return [
     // Application Settings
     'application_title' => 'MSP Voice Portal',
     'primary_color' => '#7289da', // Default primary color for accents and buttons
+    'primary_hover' => '#5b6eae', // Hover/active shade of the primary color
     'require_notes' => true,
     'max_file_size' => 10 * 1024 * 1024, // 10MB
     'default_language' => 'en',
@@ -38,6 +39,7 @@ return [
             'default-src' => ["'self'"],
             'script-src' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
             'style-src' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
+            'style-src-elem' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
             'img-src' => ["'self'", 'data:', 'https:'],
             'font-src' => ["'self'", 'cdnjs.cloudflare.com'],
             'connect-src' => ["'self'", 'blob:', 'cdnjs.cloudflare.com'],

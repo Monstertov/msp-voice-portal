@@ -22,7 +22,11 @@ foreach ($config['security_headers']['additional_headers'] as $header => $value)
 
 // Initialize CSRF protection if enabled
 if ($config['csrf']['enabled']) {
-    session_start();
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_secure'   => true,
+        'cookie_samesite' => 'Strict',
+    ]);
     if (!isset($_SESSION[$config['csrf']['token_name']])) {
         $_SESSION[$config['csrf']['token_name']] = bin2hex(random_bytes($config['csrf']['token_length']));
     }
