@@ -186,6 +186,30 @@ document.addEventListener('DOMContentLoaded', function() {
         recordingTimerDisplay.remove();
     }
 
+    // Detect the best supported audio MIME type for MediaRecorder
+    function getSupportedMimeType() {
+        const types = [
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/mp4',
+            'audio/ogg;codecs=opus',
+            'audio/ogg'
+        ];
+        for (const type of types) {
+            if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(type)) {
+                return type;
+            }
+        }
+        return ''; // let browser choose its default
+    }
+
+    // Map a MIME type string to a file extension
+    function mimeToExtension(mimeType) {
+        if (mimeType && mimeType.includes('mp4')) return 'mp4';
+        if (mimeType && mimeType.includes('ogg')) return 'ogg';
+        return 'webm'; // covers audio/webm and unknown defaults
+    }
+
     // Function to format time in MM:SS format
     function formatTime(seconds) {
         const minutes = Math.floor(seconds / 60);
@@ -344,8 +368,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             // Remove any existing audioFile from FormData
             formData.delete('audioFile');
-            // Append the recorded audio as a file
-            formData.append('audioFile', recordedAudioBlob, 'recording.wav');
+            // Append the recorded audio with the correct extension for its format
+            const recExt = mimeToExtension(recordedAudioBlob.type);
+            formData.append('audioFile', recordedAudioBlob, `recording.${recExt}`);
         } else if (selectedMethod === 'upload') {
             if (!audioFile.files.length) {
                 showNotification(t('fileRequired'), 'error');
@@ -544,8 +569,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show recording controls
             recordingSection.classList.add('recording');
 
-            // Start recording
-            mediaRecorder = new MediaRecorder(stream);
+            // Start recording with the best supported format for this browser/device
+            const mimeType = getSupportedMimeType();
+            const recorderOptions = mimeType ? { mimeType } : {};
+            mediaRecorder = new MediaRecorder(stream, recorderOptions);
             mediaRecorder.start();
 
             mediaRecorder.ondataavailable = (event) => {
@@ -569,7 +596,8 @@ document.addEventListener('DOMContentLoaded', function() {
             mediaRecorder.onstop = async () => {
                 recordingInProgress = false; // Reset flag immediately
                 clearTimeout(maxDurationTimeout);
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const recordedMimeType = (mediaRecorder.mimeType && mediaRecorder.mimeType !== '') ? mediaRecorder.mimeType : 'audio/webm';
+                const audioBlob = new Blob(audioChunks, { type: recordedMimeType });
                 if (audioBlob.size > 0) {
                     hasRecording = true;
                     recordedAudioBlob = audioBlob;
