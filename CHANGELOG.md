@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.3-beta] - 2026-03-21
+
+### Fixed
+- Default language from `config.php` now correctly applies on first page load instead of always defaulting to English
+- Audio recording on iOS Safari and other mobile browsers now works correctly — MIME type is detected at runtime (`audio/mp4` on iOS, `audio/webm` on Android/desktop) instead of being hardcoded to WAV
+- Recorded audio is uploaded with the correct file extension matching its actual format, fixing server-side validation failures on mobile recordings
+- Removed duplicate `submissionSuccess` translation key in English locale
+
+### Security
+- Blocked direct web access to `test.php` and `reset.php` via `.htaccess`
+- Added `.htaccess` to `uploads/` directory to prevent execution of server-side scripts on uploaded files
+
+### Changed
+- Example support email in `config.example.php` replaced with a generic placeholder
+
 ## [0.9.2-beta] - 2025-07-01
 
 ### Added
