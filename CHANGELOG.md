@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.3-beta] - 2026-03-21
 
+### Added
+- Custom audio player for recorded audio: themed play/pause button, seek bar, and time display — consistent across iOS Safari, Android Chrome, Firefox, and all desktop browsers. Replaces the native `<audio controls>` element which rendered differently on every platform.
+
 ### Fixed
 - CSP `connect-src` directive now includes `blob:` and `cdnjs.cloudflare.com`, resolving browser console violations when devtools fetch Bootstrap/Font Awesome source maps
 - Removed duplicate `media-src` and `connect-src` directives in `index.php` that were silently discarding the intended values (CSP only uses the first occurrence of each directive)

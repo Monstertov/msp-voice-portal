@@ -56,7 +56,7 @@ Contributions are welcome. [Open an issue](https://github.com/Monstertov/msp-voi
 - [x] Remember company name/email from previous submissions
 - [x] Play back recordings before submission
 - [ ] ElevenLabs integration
-- [ ] Custom styled audio playback
+- [x] Custom styled audio playback
 
 ### Technical
 - [x] Configurable max recording duration with warnings

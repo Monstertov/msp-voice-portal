@@ -114,10 +114,26 @@ error_reporting($config['error_handling']['error_reporting']);
                                     <button type="button" id="startRecording" class="btn btn-primary record-button" data-max-duration="<?php echo isset($config['recording_max_duration']) ? (int)$config['recording_max_duration'] : 60; ?>">
                                         <i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">Start Recording</span>
                                     </button>
-                                    <button type="button" id="deleteRecording" class="btn btn-danger d-none ms-2">
-                                        <i class="fas fa-trash"></i> <span id="deleteButtonText" data-i18n="deleteRecording">Delete Recording</span>
+                                    <audio id="audioPlayback" class="hidden"></audio>
+                                    <div id="customAudioPlayer" class="custom-audio-player hidden" aria-label="Audio playback">
+                                        <button type="button" class="audio-play-btn" id="audioPlayBtn" aria-label="Play / Pause">
+                                            <i class="fas fa-play" aria-hidden="true"></i>
+                                        </button>
+                                        <span class="audio-time" id="audioCurrentTime">0:00</span>
+                                        <div class="audio-progress-wrap" role="presentation">
+                                            <div class="audio-progress-bg">
+                                                <div class="audio-progress-fill" id="audioProgressFill"></div>
+                                            </div>
+                                            <input type="range" class="audio-seek-input" id="audioSeekInput"
+                                                   min="0" max="100" value="0" step="0.1"
+                                                   aria-label="Seek audio">
+                                        </div>
+                                        <span class="audio-time" id="audioDuration">0:00</span>
+                                    </div>
+                                    <button type="button" id="deleteRecording" class="btn btn-danger btn-sm d-none">
+                                        <i class="fas fa-trash" aria-hidden="true"></i>
+                                        <span class="d-none d-sm-inline ms-1" data-i18n="deleteRecording">Delete Recording</span>
                                     </button>
-                                    <audio id="audioPlayback" controls class="ms-2 hidden"></audio>
                                 </div>
                                 <div class="waveform" id="waveform"></div>
                             </div>

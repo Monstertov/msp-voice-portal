@@ -685,49 +685,113 @@ footer a:hover {
     pointer-events: none;
 }
 
-/* Custom audio player styling */
-#audioPlayback {
-    background: var(--bg-card);
-    border: 1.5px solid rgba(255,255,255,0.08); /* subtle light border for dark theme */
-    border-radius: 12px;
-    box-shadow: none;
-    padding: 0.25rem 0.75rem;
-    color: var(--text-primary);
-    max-width: 320px;
-    width: 100%;
-    height: 44px;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+/* Custom Audio Player */
+.custom-audio-player {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.45rem 0.75rem;
+    flex: 1;
+    min-width: 0;
     transition: border-color 0.2s;
 }
-#audioPlayback:focus {
-    outline: none;
+
+.custom-audio-player.hidden {
+    display: none;
+}
+
+.custom-audio-player:focus-within {
     border-color: var(--primary-color);
 }
 
-/* Make audio controls blend in on dark backgrounds */
-#audioPlayback::-webkit-media-controls-panel {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border-radius: 12px;
-}
-#audioPlayback::-webkit-media-controls-play-button,
-#audioPlayback::-webkit-media-controls-timeline,
-#audioPlayback::-webkit-media-controls-current-time-display,
-#audioPlayback::-webkit-media-controls-time-remaining-display,
-#audioPlayback::-webkit-media-controls-volume-slider {
-    filter: invert(0.85) brightness(0.9);
+.audio-play-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    color: #fff;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    padding: 0;
+    line-height: 1;
 }
 
-/* Responsive audio player for mobile */
-@media (max-width: 576px) {
-    #audioPlayback {
-        max-width: 100%;
-        min-width: 0;
-        height: 44px;
-        font-size: 1rem;
-        padding: 0.25rem 0.25rem;
-    }
+.audio-play-btn:hover {
+    background: var(--primary-hover);
+    transform: scale(1.08);
+}
+
+.audio-play-btn:active {
+    transform: scale(0.95);
+}
+
+/* Optical centering: play icon sits slightly left of center */
+.audio-play-btn .fa-play {
+    margin-left: 2px;
+}
+
+.audio-time {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    min-width: 30px;
+    text-align: center;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.audio-progress-wrap {
+    flex: 1;
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.audio-progress-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.audio-progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+/* Transparent overlay to capture seek clicks/touches */
+.audio-seek-input {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 #uploadSection, #textSection {
@@ -745,13 +809,6 @@ footer a:hover {
         margin-left: 0 !important;
         margin-right: 0 !important;
     }
-}
-
-#audioPlayback::-webkit-media-controls-volume-slider {
-    filter: invert(1) brightness(1.2);
-}
-#audioPlayback::-webkit-media-controls-mute-button {
-    filter: invert(1) brightness(1.2);
 }
 
 .custom-file-group {

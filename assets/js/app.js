@@ -217,65 +217,123 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    // Function to create audio player
+    // Function to create and wire up the custom audio player
     function createAudioPlayer(audioBlob) {
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audioPlayback = document.getElementById('audioPlayback');
-        const deleteButton = document.getElementById('deleteRecording');
-        const startRecordingButton = document.getElementById('startRecording');
+        const audioEl    = document.getElementById('audioPlayback');
+        const player     = document.getElementById('customAudioPlayer');
+        const playBtn    = document.getElementById('audioPlayBtn');
+        const currentEl  = document.getElementById('audioCurrentTime');
+        const durationEl = document.getElementById('audioDuration');
+        const fillEl     = document.getElementById('audioProgressFill');
+        const seekEl     = document.getElementById('audioSeekInput');
+        const deleteBtn  = document.getElementById('deleteRecording');
+        const startBtn   = document.getElementById('startRecording');
 
-        if (!audioPlayback || !deleteButton || !startRecordingButton) {
-            return;
+        if (!audioEl || !player || !playBtn || !deleteBtn || !startBtn) return;
+
+        // Set source
+        audioEl.src = URL.createObjectURL(audioBlob);
+
+        function fmt(s) {
+            if (!isFinite(s) || isNaN(s)) return '0:00';
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec.toString().padStart(2, '0')}`;
         }
 
-        // Show audio playback and set source
-        audioPlayback.src = audioUrl;
-        audioPlayback.classList.remove('hidden');
+        function onTimeUpdate() {
+            const pct = audioEl.duration ? (audioEl.currentTime / audioEl.duration) * 100 : 0;
+            fillEl.style.width = pct + '%';
+            seekEl.value = pct;
+            currentEl.textContent = fmt(audioEl.currentTime);
+        }
 
-        // Show delete button, hide start recording button
-        deleteButton.classList.remove('d-none');
-        startRecordingButton.classList.add('d-none');
+        function onLoadedMetadata() {
+            durationEl.textContent = fmt(audioEl.duration);
+        }
 
-        // Add delete recording functionality
-        const deleteHandler = () => {
-            // Hide audio playback
-            hideAudioPlayback();
-            
-            // Reset file input
-            const fileInput = document.getElementById('audioFile');
-            if (fileInput) {
-                fileInput.value = '';
+        function onEnded() {
+            playBtn.querySelector('i').className = 'fas fa-play';
+            fillEl.style.width = '0%';
+            seekEl.value = 0;
+            currentEl.textContent = '0:00';
+            audioEl.currentTime = 0;
+        }
+
+        function onPlayPause() {
+            if (audioEl.paused) {
+                audioEl.play();
+                playBtn.querySelector('i').className = 'fas fa-pause';
+            } else {
+                audioEl.pause();
+                playBtn.querySelector('i').className = 'fas fa-play';
             }
-            
-            // Hide delete button, show start recording button
-            deleteButton.classList.add('d-none');
-            startRecordingButton.classList.remove('d-none');
+        }
 
-            // Remove the event listener to prevent multiple bindings
-            deleteButton.removeEventListener('click', deleteHandler);
+        function onSeek() {
+            if (audioEl.duration) {
+                audioEl.currentTime = (seekEl.value / 100) * audioEl.duration;
+            }
+        }
+
+        // Store listeners on the element for cleanup
+        player._cleanup = function() {
+            audioEl.removeEventListener('timeupdate', onTimeUpdate);
+            audioEl.removeEventListener('loadedmetadata', onLoadedMetadata);
+            audioEl.removeEventListener('ended', onEnded);
+            playBtn.removeEventListener('click', onPlayPause);
+            seekEl.removeEventListener('input', onSeek);
+            player._cleanup = null;
         };
 
-        // Add the event listener
-        deleteButton.addEventListener('click', deleteHandler);
+        audioEl.addEventListener('timeupdate', onTimeUpdate);
+        audioEl.addEventListener('loadedmetadata', onLoadedMetadata);
+        audioEl.addEventListener('ended', onEnded);
+        playBtn.addEventListener('click', onPlayPause);
+        seekEl.addEventListener('input', onSeek);
+
+        // Show player, hide record button
+        player.classList.remove('hidden');
+        deleteBtn.classList.remove('d-none');
+        startBtn.classList.add('d-none');
+
+        // Wire up delete
+        const deleteHandler = () => {
+            hideAudioPlayback();
+            const fileInput = document.getElementById('audioFile');
+            if (fileInput) fileInput.value = '';
+            deleteBtn.removeEventListener('click', deleteHandler);
+        };
+        deleteBtn.addEventListener('click', deleteHandler);
     }
 
-    // Function to hide audio playback (if needed)
+    // Hide the custom audio player and reset all state
     function hideAudioPlayback() {
-        const audioPlayback = document.getElementById('audioPlayback');
-        const deleteButton = document.getElementById('deleteRecording');
-        const startRecordingButton = document.getElementById('startRecording');
+        const audioEl    = document.getElementById('audioPlayback');
+        const player     = document.getElementById('customAudioPlayer');
+        const playBtn    = document.getElementById('audioPlayBtn');
+        const currentEl  = document.getElementById('audioCurrentTime');
+        const durationEl = document.getElementById('audioDuration');
+        const fillEl     = document.getElementById('audioProgressFill');
+        const seekEl     = document.getElementById('audioSeekInput');
+        const deleteBtn  = document.getElementById('deleteRecording');
+        const startBtn   = document.getElementById('startRecording');
 
-        // Hide audio playback
-        audioPlayback.src = '';
-        audioPlayback.classList.add('hidden');
+        if (audioEl) {
+            audioEl.pause();
+            audioEl.src = '';
+        }
 
-        // Hide delete button, show start recording button
-        if (deleteButton) {
-            deleteButton.classList.add('d-none');
-        }
-        if (startRecordingButton) {
-            startRecordingButton.classList.remove('d-none');
-        }
+        if (player && player._cleanup) player._cleanup();
+
+        if (player)     player.classList.add('hidden');
+        if (playBtn)    playBtn.querySelector('i').className = 'fas fa-play';
+        if (currentEl)  currentEl.textContent = '0:00';
+        if (durationEl) durationEl.textContent = '0:00';
+        if (fillEl)     fillEl.style.width = '0%';
+        if (seekEl)     seekEl.value = 0;
+        if (deleteBtn)  deleteBtn.classList.add('d-none');
+        if (startBtn)   startBtn.classList.remove('d-none');
     }
 
     // Function to convert audio data to WAV
@@ -422,19 +480,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (fileNameSpan) fileNameSpan.textContent = '';
                 form.classList.remove('was-validated');
                 hasRecording = false;
-                
-                // Clear recording elements
-                const audioPlayback = document.getElementById('audioPlayback');
-                if (audioPlayback) {
-                    audioPlayback.src = '';
-                    audioPlayback.classList.add('hidden');
-                }
-                
-                // Remove delete button if it exists
-                const deleteButton = document.getElementById('deleteRecording');
-                if (deleteButton) {
-                    deleteButton.remove();
-                }
+                recordedAudioBlob = null;
+
+                // Reset audio player
+                hideAudioPlayback();
             } else {
                 showNotification(result.message, 'error');
             }
@@ -469,28 +518,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         recordingSection.classList.add('active');
                         recordingSection.style.display = 'block';
                         
-                        // Ensure record button is visible
-                        const startRecordingButton = document.getElementById('startRecording');
-                        const deleteRecordingButton = document.getElementById('deleteRecording');
-                        const audioPlayback = document.getElementById('audioPlayback');
-                        
-                        if (startRecordingButton) {
-                            startRecordingButton.style.display = 'inline-block';
-                            startRecordingButton.classList.remove('d-none');
-                        }
-                        
-                        if (deleteRecordingButton) {
-                            deleteRecordingButton.classList.add('d-none');
-                        }
-                        
-                        if (audioPlayback) {
-                            audioPlayback.classList.add('hidden');
-                            audioPlayback.src = '';
-                        }
-                        
-                        // Reset recording state
+                        // Reset player and recording state
+                        hideAudioPlayback();
                         hasRecording = false;
                         audioChunks = [];
+                        recordedAudioBlob = null;
                     }
                     break;
                 case 'upload':
@@ -646,18 +678,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Add event listener for delete recording button
-    const deleteButton = document.getElementById('deleteRecording');
-    if (deleteButton) {
-        deleteButton.addEventListener('click', () => {
-            hideAudioPlayback();
-            deleteButton.classList.add('d-none');
-            recordButton.classList.remove('d-none');
-            audioChunks = [];
-            hasRecording = false;
-        });
-    }
-
     // Drag & Drop functionality
     const cardBody = document.querySelector('.card-body');
     let dragCounter = 0;
@@ -776,14 +796,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-
-    // Hide audio playback on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        const audioPlayback = document.getElementById('audioPlayback');
-        if (audioPlayback) {
-            audioPlayback.classList.add('hidden');
-        }
-    });
 
     // Custom file input logic
     const audioFileInput = document.getElementById('audioFile');
