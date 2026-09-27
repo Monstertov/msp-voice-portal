@@ -32,6 +32,8 @@ All notable changes to this project will be documented in this file.
 - Password reset instructions in `config.php` / `config.example.php`; the hash command reads the password from input, so special characters work
 
 ### Fixed
+- CSS and JS are loaded with a version (`?v=<change time>`), so browsers pick up updates right away instead of running cached old files. This showed as the Start recording button appearing when `default_input_method` was `text`
+- The record button is only forced visible when recording is the selected method
 - Accent-coloured focus rings, hover tints and the drag-and-drop highlight referenced an undefined CSS variable and never showed; they now use the configured primary colour
 - Works on PHP 7.3 and newer again (no PHP 8-only functions)
 - Permissions-Policy header now uses valid syntax (`camera=(self)`, `geolocation=()`), whether config values are written as `'self'`, `self`, `'none'` or `()`

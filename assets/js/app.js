@@ -24,15 +24,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Force visibility of record button
     function ensureRecordButtonVisibility() {
+        // Only when recording is the selected method (config default_input_method can pick another)
+        const recordRadio = document.getElementById('recordAudio');
+        if (recordRadio && !recordRadio.checked) {
+            return;
+        }
         if (recordButton) {
             recordButton.style.display = 'inline-block !important';
             recordButton.classList.remove('d-none');
             recordButton.setAttribute('style', 'display: inline-block !important; visibility: visible !important;');
         }
         
-        // Only when recording is the selected method (config default_input_method can pick another)
-        const recordRadio = document.getElementById('recordAudio');
-        if (recordingSection && (!recordRadio || recordRadio.checked)) {
+        if (recordingSection) {
             recordingSection.classList.add('active');
             recordingSection.style.display = 'block !important';
             recordingSection.style.opacity = '1 !important';

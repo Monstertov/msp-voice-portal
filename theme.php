@@ -31,6 +31,12 @@ function theme_colors($config) {
     return $colors;
 }
 
+// Asset URL with the file's change time, so browsers load the new version right after an update
+// instead of running a cached old one. $path is relative to the portal folder.
+function asset_url($path, $prefix = '') {
+    return $prefix . $path . '?v=' . @filemtime(__DIR__ . '/' . $path);
+}
+
 // Value for a style="" attribute on <body>
 function theme_css($config) {
     $c = theme_colors($config);

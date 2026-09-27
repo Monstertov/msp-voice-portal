@@ -380,7 +380,7 @@ function model_options($models, $cap, $selected) {
     <title><?= h($title) ?></title>
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="<?= asset_url('assets/css/style.css', '../') ?>" rel="stylesheet">
     <style>
         /* Bootstrap parts of the admin page follow the colours from config.php too */
         body { background-color: var(--bs-darker); color: var(--bs-light); }

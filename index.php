@@ -69,7 +69,7 @@ error_reporting($config['error_handling']['error_reporting']);
     <!-- Styles -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo asset_url('assets/css/style.css'); ?>" rel="stylesheet">
 </head>
 <body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>" data-default-lang="<?php echo htmlspecialchars($config['default_language']); ?>" style="<?php echo theme_css($config); ?>">
     <div class="container py-2">
@@ -252,7 +252,7 @@ error_reporting($config['error_handling']['error_reporting']);
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.min.js"></script>
-    <script src="assets/js/languages.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script src="<?php echo asset_url('assets/js/languages.js'); ?>"></script>
+    <script src="<?php echo asset_url('assets/js/app.js'); ?>"></script>
 </body>
 </html> 
