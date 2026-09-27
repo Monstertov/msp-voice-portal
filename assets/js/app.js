@@ -169,9 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
         notification.className = `alert alert-${type === 'error' ? 'error' : 'info'} alert-dismissible fade show`;
         notification.innerHTML = `
             <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            ${message}
+            <span></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `;
+        notification.querySelector('span').textContent = message; // server text is never parsed as HTML
         notificationContainer.appendChild(notification);
 
         // Auto remove after 5 seconds

@@ -1,0 +1,5 @@
+# The admin page runs no JavaScript. This overrides a looser Content-Security-Policy from the
+# parent .htaccess (admin/index.php sends the same header for servers without mod_headers).
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'none'; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; img-src 'self' data:; media-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
+</IfModule>

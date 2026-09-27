@@ -31,37 +31,41 @@ $defaults = [
 $saved = is_file($settingsFile) ? (json_decode(file_get_contents($settingsFile), true) ?: []) : [];
 $el = array_replace_recursive($defaults, $config['elevenlabs'] ?? [], $saved);
 
-// Security headers from config, as on the portal itself
-foreach ($config['security_headers']['permissions_policy'] ?? [] as $feature => $value) {
-    $pp[] = "$feature=$value";
-}
-if (!empty($pp)) header('Permissions-Policy: ' . implode(', ', $pp));
-foreach ($config['security_headers']['content_security_policy'] ?? [] as $directive => $sources) {
-    $csp[] = $directive . ' ' . implode(' ', $sources);
-}
-if (!empty($csp)) header('Content-Security-Policy: ' . implode('; ', $csp));
+// Security headers from config, plus a strict CSP: the admin page runs no JavaScript at all
 foreach ($config['security_headers']['additional_headers'] ?? [] as $name => $value) {
     header("$name: $value");
 }
+header("Content-Security-Policy: default-src 'none'; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; "
+    . "img-src 'self' data:; media-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 header('X-Robots-Tag: noindex, nofollow');
 header('Cache-Control: no-store');
 
-if (!$users) {
-    http_response_code(503);
-    exit('Admin is not configured. Add the admin section from config.example.php to config.php.');
+// Switched off (or not set up) in config.php: behave as if the page does not exist
+if (empty($config['admin']['enabled']) || !$users) {
+    http_response_code(404);
+    exit('Not found');
 }
+$aiOn = !empty($config['elevenlabs']['enabled']);
 
 session_name('msp_admin');
 session_start(['cookie_httponly' => true, 'cookie_secure' => true, 'cookie_samesite' => 'Strict']);
 $csrf = $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+if (!empty($_SESSION['admin']) && time() - ($_SESSION['seen'] ?? 0) > 7200) {
+    unset($_SESSION['admin']); // signed out after 2 hours without activity
+}
+$_SESSION['seen'] = time();
 
 function h($s) { return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8'); }
 // meta.json holds the values as process.php stored them (already HTML-escaped), so decode before use
 function plain($s) { return html_entity_decode((string) $s, ENT_QUOTES, 'UTF-8'); }
 function back($to = './') { header('Location: ' . $to); exit; }
 function flash($msg, $ok = true) { $_SESSION['flash'] = [$msg, $ok]; }
+// Request value as a string (arrays like ?x[]=1 become '', so they can't be used as array keys)
+function str($v) { return is_string($v) ? $v : ''; }
 function valid_id($id) { return is_string($id) && preg_match('/^\d{8}-\d{6}-[0-9a-f]{8}$/', $id); }
 function valid_voice($v) { return is_string($v) && preg_match('/^[A-Za-z0-9]{10,40}$/', $v); }
+// "sk_8b64…5913": enough to recognise which key is active without showing it
+function key_hint($key) { return strlen($key) > 12 ? substr($key, 0, 7) . '…' . substr($key, -4) : '…'; }
 
 // One call to the ElevenLabs API. $fields null = GET; $multipart = send files. Returns the body.
 function elevenlabs($el, $path, $fields = null, $multipart = false) {
@@ -133,7 +137,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = (string) ($_POST['user'] ?? '');
         if ($t['n'] >= 5) {
             flash('Too many attempts. Try again in 15 minutes.', false);
-        } elseif (isset($users[$user]) && password_verify((string) ($_POST['password'] ?? ''), $users[$user])) {
+        // Unknown users are checked against a dummy hash, so response time does not reveal usernames
+        } elseif (password_verify((string) ($_POST['password'] ?? ''), $users[$user] ?? '$2y$10$2A7YEqLGqa031Xru3MfYCeycqkBua3TrRn2MmC8Lm1LH6lpUOdde2')
+            && isset($users[$user])) {
             @unlink($tf);
             session_regenerate_id(true);
             $_SESSION['admin'] = $user;
@@ -151,6 +157,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($_SESSION['admin'])) back();
+    if (!$aiOn && $action !== 'delete') back();
+
+    if ($action === 'add_voice') {
+        $lib = $_SESSION['lib'][str($_POST['voice_id'] ?? '')] ?? null;
+        try {
+            if (!$lib) throw new RuntimeException('Search the library again, that result expired.');
+            elevenlabs($el, '/v1/voices/add/' . rawurlencode($lib['owner']) . '/' . rawurlencode($_POST['voice_id']), ['new_name' => $lib['name']]);
+            unset($_SESSION['voices']);
+            flash($lib['name'] . ' added to your voices. Pick it in the voice dropdowns.');
+        } catch (Throwable $e) {
+            flash($e->getMessage(), false);
+        }
+        back('?page=settings&' . http_build_query(array_intersect_key($_POST, ['lib_lang' => 1, 'lib_q' => 1, 'lib_gender' => 1])) . '#library');
+    }
 
     // Settings page actions
     if ($action === 'save_settings') {
@@ -172,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         foreach (['tts_model', 'sts_model', 'stt_model'] as $f) {
             if (preg_match('/^[a-z0-9_]{3,60}$/', (string) ($_POST[$f] ?? ''))) $new[$f] = $_POST[$f];
         }
-        if (isset($formats[$_POST['output_format'] ?? ''])) $new['output_format'] = $_POST['output_format'];
+        if (isset($formats[str($_POST['output_format'] ?? '')])) $new['output_format'] = $_POST['output_format'];
         foreach (['stability' => [0, 1], 'similarity_boost' => [0, 1], 'style' => [0, 1], 'speed' => [0.7, 1.2]] as $f => [$lo, $hi]) {
             if (is_numeric($_POST[$f] ?? null)) $new[$f] = max($lo, min($hi, round((float) $_POST[$f], 2)));
         }
@@ -187,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'test_voice') {
-        $code = isset($languages[$_POST['lang'] ?? '']) ? $_POST['lang'] : 'en';
+        $code = isset($languages[str($_POST['lang'] ?? '')]) ? $_POST['lang'] : 'en';
         $sample = ['nl' => 'Welkom bij ons bedrijf. Al onze medewerkers zijn in gesprek, een moment geduld alstublieft.',
                    'en' => 'Welcome to our company. All of our colleagues are busy, please hold the line.'][$code] ?? 'Hello.';
         try {
@@ -248,9 +268,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     back("./#s-$id");
 }
 
+// ---- Voice library preview: proxied, because the page only loads media from itself ----
+if (isset($_GET['libpreview'])) {
+    $url = $_SESSION['lib'][str($_GET['libpreview'])]['url'] ?? '';
+    if (empty($_SESSION['admin']) || !$aiOn || !str_starts_with($url, 'https://storage.googleapis.com/')) {
+        http_response_code(404);
+        exit('Not found');
+    }
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20, CURLOPT_PROTOCOLS => CURLPROTO_HTTPS]);
+    $audio = curl_exec($ch);
+    $ok = curl_getinfo($ch, CURLINFO_RESPONSE_CODE) === 200;
+    curl_close($ch);
+    if (!$ok) {
+        http_response_code(502);
+        exit('Preview unavailable');
+    }
+    header('Content-Type: audio/mpeg');
+    header('Cache-Control: private, max-age=86400');
+    echo $audio;
+    exit;
+}
+
 // ---- Stored audio (players and download links) ----
 if (isset($_GET['file'])) {
-    $file = (string) $_GET['file'];
+    $file = str($_GET['file']);
     if ($file === 'preview') {
         $path = (glob($dataDir . 'preview.*') ?: [''])[0];
     } else {
@@ -261,7 +303,12 @@ if (isset($_GET['file'])) {
         http_response_code(404);
         exit('Not found');
     }
-    header('Content-Type: ' . (mime_content_type($path) ?: 'application/octet-stream'));
+    // Type from the extension, never sniffed from the content: an upload can never be served as a web page
+    $types = ['mp3' => 'audio/mpeg', 'wav' => 'audio/wav', 'mp4' => 'audio/mp4', 'm4a' => 'audio/mp4',
+              'webm' => 'audio/webm', 'ogg' => 'audio/ogg', 'aac' => 'audio/aac'];
+    header('Content-Type: ' . ($types[pathinfo($path, PATHINFO_EXTENSION)] ?? 'application/octet-stream'));
+    header('Content-Security-Policy: sandbox');
+    header('X-Content-Type-Options: nosniff');
     header('Content-Length: ' . filesize($path));
     if (isset($_GET['download'])) header('Content-Disposition: attachment; filename="' . str_replace('/', '-', $file) . '"');
     readfile($path);
@@ -271,10 +318,10 @@ if (isset($_GET['file'])) {
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 $title = ($config['application_title'] ?? 'MSP Voice Portal') . ' admin';
-$page = ($_GET['page'] ?? '') === 'settings' ? 'settings' : 'submissions';
+$page = $aiOn && ($_GET['page'] ?? '') === 'settings' ? 'settings' : 'submissions';
 
 // Voices and models from the account, fetched once per session
-if (!empty($_SESSION['admin']) && $el['api_key'] !== '' && !isset($_SESSION['voices'])) {
+if ($aiOn && !empty($_SESSION['admin']) && $el['api_key'] !== '' && !isset($_SESSION['voices'])) {
     try {
         $_SESSION['voices'] = [];
         foreach (json_decode(elevenlabs($el, '/v2/voices?page_size=100'), true)['voices'] ?? [] as $v) {
@@ -357,16 +404,24 @@ function model_options($models, $cap, $selected) {
     </div>
 <?php else: ?>
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-        <h1 class="h4 m-0"><?= h($title) ?></h1>
+        <div>
+            <h1 class="h4 m-0"><?= h($title) ?></h1>
+            <?php if ($aiOn && $el['api_key'] !== ''): ?>
+                <div class="small text-secondary">ElevenLabs key active: <code><?= h(key_hint($el['api_key'])) ?></code></div>
+            <?php endif; ?>
+        </div>
         <form method="post" class="d-flex align-items-center gap-2">
             <a class="btn btn-sm <?= $page === 'submissions' ? 'btn-primary' : 'btn-outline-secondary' ?>" href="./">Submissions</a>
-            <a class="btn btn-sm <?= $page === 'settings' ? 'btn-primary' : 'btn-outline-secondary' ?>" href="?page=settings">AI settings</a>
+            <?php if ($aiOn): ?>
+                <a class="btn btn-sm <?= $page === 'settings' ? 'btn-primary' : 'btn-outline-secondary' ?>" href="?page=settings">AI settings</a>
+            <?php endif; ?>
             <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
             <button class="btn btn-sm btn-outline-secondary" name="action" value="logout">Sign out (<?= h($_SESSION['admin']) ?>)</button>
         </form>
     </div>
 
-    <?php if (!empty($voiceError)): ?>
+    <?php if (!$aiOn): ?>
+    <?php elseif (!empty($voiceError)): ?>
         <div class="alert alert-warning">Could not load voices: <?= h($voiceError) ?></div>
     <?php elseif ($el['api_key'] === ''): ?>
         <div class="alert alert-warning">No ElevenLabs API key yet. Add one under <a href="?page=settings">AI settings</a>.</div>
@@ -384,8 +439,16 @@ function model_options($models, $cap, $selected) {
             <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
             <h2 class="h5 mb-3">ElevenLabs account</h2>
             <label class="form-label" for="api_key">API key</label>
+            <p class="mb-2">
+                <?php if ($keySource): ?>
+                    <span class="badge text-bg-success">Active</span> <code><?= h(key_hint($el['api_key'])) ?></code>
+                    <span class="small text-secondary">(<?= h($keySource) ?>)</span>
+                <?php else: ?>
+                    <span class="badge text-bg-warning">No key</span>
+                <?php endif; ?>
+            </p>
             <input class="form-control" id="api_key" name="api_key" type="password" autocomplete="off"
-                placeholder="<?= $keySource ? h('Key ending in ' . substr($el['api_key'], -4) . " ($keySource). Paste a new one to replace it.") : 'Paste your key from elevenlabs.io > Developers > API keys' ?>">
+                placeholder="<?= $keySource ? 'Paste a new key here to replace it' : 'Paste your key from elevenlabs.io > Developers > API keys' ?>">
             <?php if (isset($saved['api_key'])): ?>
                 <div class="form-check mt-2">
                     <input class="form-check-input" type="checkbox" name="clear_key" value="1" id="clear_key">
@@ -397,6 +460,7 @@ function model_options($models, $cap, $selected) {
                     Plan: <?= h($usage['tier'] ?? '?') ?> ·
                     <?= number_format((int) $usage['character_count'], 0, ',', '.') ?> of <?= number_format((int) $usage['character_limit'], 0, ',', '.') ?> credits used
                     <?php if (!empty($usage['next_character_count_reset_unix'])): ?>· resets <?= h(date('d-m-Y', $usage['next_character_count_reset_unix'])) ?><?php endif; ?>
+                    <?php if (isset($usage['voice_limit'])): ?>· <?= (int) ($usage['voice_slots_used'] ?? 0) ?> of <?= (int) $usage['voice_limit'] ?> custom voice slots used<?php endif; ?>
                 </p>
             <?php elseif ($usage): ?>
                 <p class="small text-danger mt-2 mb-0"><?= h($usage['error']) ?></p>
@@ -404,7 +468,7 @@ function model_options($models, $cap, $selected) {
 
             <h2 class="h5 mt-4 mb-1">Voices</h2>
             <p class="small text-secondary">Default voice for submissions in each portal language. You can still pick another voice per submission.
-                More voices: add them to <em>My Voices</em> in ElevenLabs, then sign out and in again.</p>
+                Need more? Browse the <a href="#library">voice library</a> below.</p>
             <?php foreach ($languages as $code => $label): ?>
                 <label class="form-label" for="voice-<?= $code ?>"><?= h($label) ?> voice</label>
                 <div class="d-flex gap-2 mb-3">
@@ -475,6 +539,85 @@ function model_options($models, $cap, $selected) {
         </form>
     <?php endforeach; ?>
 
+    <?php
+    // Voice library: shared community voices, searchable by language, gender and text
+    $libLang = isset($languages[str($_GET['lib_lang'] ?? '')]) || ($_GET['lib_lang'] ?? null) === '' ? $_GET['lib_lang']
+        : (isset($languages[$config['default_language'] ?? '']) ? $config['default_language'] : 'en');
+    $libGender = in_array($_GET['lib_gender'] ?? '', ['female', 'male', 'neutral'], true) ? $_GET['lib_gender'] : '';
+    $libQ = mb_substr(trim(str($_GET['lib_q'] ?? '')), 0, 60);
+    $libResults = [];
+    $libError = '';
+    if ($el['api_key'] !== '') {
+        try {
+            $q = http_build_query(array_filter(['page_size' => 24, 'language' => $libLang, 'gender' => $libGender, 'search' => $libQ]));
+            $libResults = json_decode(elevenlabs($el, "/v1/shared-voices?$q"), true)['voices'] ?? [];
+        } catch (Throwable $e) {
+            $libError = $e->getMessage();
+        }
+    }
+    $_SESSION['lib'] = [];
+    foreach ($libResults as $v) {
+        $_SESSION['lib'][$v['voice_id']] = ['owner' => $v['public_owner_id'], 'url' => $v['preview_url'] ?? '', 'name' => $v['name']];
+    }
+    $libKeep = ['lib_lang' => $libLang, 'lib_gender' => $libGender, 'lib_q' => $libQ];
+    ?>
+    <div class="card shadow mb-4" id="library">
+        <div class="card-body p-4">
+            <h2 class="h5 mb-1">Voice library</h2>
+            <p class="small text-secondary">Voices shared by the ElevenLabs community. Listen, then add the ones you like; they show up in the voice dropdowns above.</p>
+            <form method="get" action="#library" class="row g-2 mb-2">
+                <input type="hidden" name="page" value="settings">
+                <div class="col-sm-3">
+                    <select class="form-select" name="lib_lang" aria-label="Language">
+                        <?php foreach ($languages + ['' => 'Any language'] as $code => $label): ?>
+                            <option value="<?= h($code) ?>" <?= $code === $libLang ? 'selected' : '' ?>><?= h($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <select class="form-select" name="lib_gender" aria-label="Gender">
+                        <?php foreach (['' => 'Any voice', 'female' => 'Female', 'male' => 'Male', 'neutral' => 'Neutral'] as $g => $label): ?>
+                            <option value="<?= $g ?>" <?= $g === $libGender ? 'selected' : '' ?>><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-sm-4">
+                    <input class="form-control" name="lib_q" value="<?= h($libQ) ?>" placeholder="Search, e.g. calm, warm, narrator" aria-label="Search">
+                </div>
+                <div class="col-sm-2"><button class="btn btn-outline-light w-100">Search</button></div>
+            </form>
+            <?php if ($libError): ?><p class="text-danger small"><?= h($libError) ?></p><?php endif; ?>
+            <?php if (!$libResults && !$libError): ?><p class="text-secondary small">No voices found.</p><?php endif; ?>
+            <?php foreach ($libResults as $v): ?>
+                <div class="border-top py-3">
+                    <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                        <div>
+                            <strong><?= h($v['name']) ?></strong>
+                            <span class="small text-secondary ms-1"><?= h(implode(' · ', array_filter([
+                                $v['gender'] ?? '', str_replace('_', ' ', $v['age'] ?? ''), $v['accent'] ?? '', $v['locale'] ?? '']))) ?></span>
+                        </div>
+                        <?php if (isset($voices[$v['voice_id']])): ?>
+                            <span class="badge text-bg-success">In your voices</span>
+                        <?php else: ?>
+                            <form method="post">
+                                <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
+                                <input type="hidden" name="voice_id" value="<?= h($v['voice_id']) ?>">
+                                <?php foreach ($libKeep as $k => $val): ?><input type="hidden" name="<?= $k ?>" value="<?= h($val) ?>"><?php endforeach; ?>
+                                <button class="btn btn-sm btn-outline-light" name="action" value="add_voice">Add to my voices</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($v['description'])): ?>
+                        <div class="small text-secondary mb-1"><?= h(mb_strimwidth($v['description'], 0, 180, '…')) ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($v['preview_url'])): ?>
+                        <audio controls preload="none" class="w-100" src="?libpreview=<?= h(rawurlencode($v['voice_id'])) ?>"></audio>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
 <?php else:
     $dirs = glob($dataDir . '*/meta.json') ?: [];
     rsort($dirs);
@@ -531,9 +674,12 @@ function model_options($models, $cap, $selected) {
             <form method="post" class="mt-3">
                 <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
                 <input type="hidden" name="id" value="<?= h($id) ?>">
+                <?php if ($aiOn): ?>
                 <textarea class="form-control mb-2" name="text" rows="3"
                     placeholder="<?= !empty($m['audio']) ? 'Click Transcribe to fill this from the recording, or type the text' : 'Text to speak' ?>"><?= h($text) ?></textarea>
+                <?php endif; ?>
                 <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <?php if ($aiOn): ?>
                     <select class="form-select form-select-sm w-auto" name="voice" aria-label="Voice">
                         <?= voice_options($voices, $voice, $lang) ?>
                     </select>
@@ -541,6 +687,7 @@ function model_options($models, $cap, $selected) {
                     <?php if (!empty($m['audio'])): ?>
                         <button class="btn btn-sm btn-outline-light" name="action" value="transcribe">Transcribe</button>
                         <button class="btn btn-sm btn-outline-light" name="action" value="swap">Voice swap</button>
+                    <?php endif; ?>
                     <?php endif; ?>
                     <button class="btn btn-sm btn-outline-danger ms-auto" name="action" value="delete">Delete</button>
                 </div>

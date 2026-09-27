@@ -135,6 +135,7 @@ function validate_file($file) {
         'audio/wave' => 'wav',
         'audio/x-wav' => 'wav',
         'audio/mp4' => 'mp4',
+        'video/mp4' => 'mp4', // iOS recordings are often detected as video/mp4
         'audio/webm' => 'webm',
         'video/webm' => 'webm',
         'application/octet-stream' => 'mp3', // Add this for some browsers
@@ -156,6 +157,12 @@ function validate_file($file) {
         'file_type' => $file['type']
     ]);
     
+    // Only whitelisted extensions; the saved file keeps this extension
+    if (!in_array(strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)), ['mp3', 'wav', 'mp4', 'webm', 'ogg', 'aac', 'm4a'], true)) {
+        log_error("Extension not allowed", ['file_name' => $file['name']]);
+        return false;
+    }
+
     // Get MIME type using finfo
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime_type = finfo_file($finfo, $file['tmp_name']);
@@ -214,16 +221,6 @@ function validate_file($file) {
             return true;
         }
         log_error("AAC file with invalid header", ['header' => $header_hex]);
-    }
-    
-    // If MIME type not found, check file extension as fallback
-    $valid_extensions = ['mp3', 'wav', 'mp4', 'webm', 'ogg', 'aac', 'm4a'];
-    
-    log_error("Checking file extension", ['extension' => $extension]);
-    
-    if (in_array($extension, $valid_extensions)) {
-        log_error("File extension is valid", ['extension' => $extension]);
-        return true;
     }
     
     log_error("Invalid file type", [
@@ -336,7 +333,7 @@ function send_email($config, $data, $attachment_path = null) {
             'to' => $config['email']['to'],
             'subject' => $mail->Subject
         ]);
-        throw new Exception("Email sending failed: " . $mail->ErrorInfo);
+        throw new Exception("Email sending failed");
     }
 }
 
@@ -423,6 +420,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         ];
 
+        if (!is_string($currentLang) || !isset($translations[$currentLang])) {
+            $currentLang = isset($translations[$config['default_language']]) ? $config['default_language'] : 'en';
+        }
+
         // Validate required fields
         if (empty($_POST['companyName']) || empty($_POST['contactEmail'])) {
             log_error("Missing required fields", [
@@ -463,7 +464,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'textContent' => sanitize_input($_POST['textContent'] ?? ''),
             'email_subject' => sanitize_input($_POST['email_subject'] ?? 'MSP Voice Portal Request'),
             // Portal language, so the admin page picks the matching AI voice
-            'lang' => isset($translations[$currentLang]) ? $currentLang : $config['default_language']
+            'lang' => $currentLang
         ];
 
         // Store in session
@@ -588,14 +589,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Send email
-        if (send_email($config, $data, $attachment_path)) {
+        try {
+            $sent = send_email($config, $data, $attachment_path);
+        } catch (Exception $e) {
+            throw new Exception($translations[$currentLang]['submission_failed']);
+        }
+        if ($sent) {
             $response['success'] = true;
             $response['message'] = $translations[$currentLang]['submission_success'];
             
             // Keep the submission for the admin page; the email already went out, so a storage
             // problem is only logged
             try {
-                store_submission($config, $data, $attachment_path);
+                if (!empty($config['admin']['enabled'])) store_submission($config, $data, $attachment_path);
             } catch (Throwable $e) {
                 log_error("Storing submission failed", ['error' => $e->getMessage()]);
             }
@@ -626,37 +632,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // If not POST request, redirect to index
 header('Location: index.php');
 exit;
-
-// Add file content validation
-function validateFileContent($file_path) {
-    global $config;
-    
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime_type = finfo_file($finfo, $file_path);
-    finfo_close($finfo);
-    
-    // Add more thorough content validation
-    if (!in_array($mime_type, $config['upload']['allowed_types'])) {
-        return false;
-    }
-    
-    // Check file headers
-    $file_header = file_get_contents($file_path, false, null, 0, 8);
-    $valid_headers = [
-        'audio/mpeg' => "\xFF\xFB",
-        'audio/wav' => "RIFF",
-        'audio/mp4' => "ftyp",
-        'audio/webm' => "\x1A\x45\xDF\xA3",
-        'audio/ogg' => "OggS",
-        'audio/aac' => "\xFF\xF1", // ADTS AAC
-        'audio/x-m4a' => "ftyp"
-    ];
-    
-    foreach ($valid_headers as $mime => $header) {
-        if ($mime_type === $mime && strpos($file_header, $header) === 0) {
-            return true;
-        }
-    }
-    
-    return false;
-} 

@@ -8,10 +8,21 @@ All notable changes to this project will be documented in this file.
 - Admin page at `/admin/`: sign in with users from `config.php`, see recent submissions with their recordings, download them, delete them
 - ElevenLabs AI voice on the admin page: generate AI voice from text, transcribe recordings to editable text, and voice swap recordings
 - AI settings page: API key, default voice per portal language (Dutch, English), models, voice tuning (stability, similarity, style, speed) and output format (MP3 or WAV 8/16 kHz for phone systems), plus a test button and credit usage. Saved to `data/settings.json`
-- Submissions are now stored in `data/` (kept for `admin.retention_days`, default 30) in addition to being emailed
+- Submissions are now stored in `data/` (kept for `admin.retention_days`, default 30) in addition to being emailed, when the admin page is on
+- On/off switches in `config.php`: `admin.enabled` and `elevenlabs.enabled`, both off by default. The portal works exactly as before without them
+- Voice library on the AI settings page: search ElevenLabs community voices by language, gender and keyword, preview them and add them to your account
+- The active API key is shown as `sk_ab12…wxyz` in the admin header and on the AI settings page
 
 ### Security
-- `data/` is blocked from the web (`data/.htaccess`, root `.htaccess` rule, nginx example). Admin logins are throttled (5 failed attempts per 15 minutes per IP) and every admin action is CSRF protected
+- `data/` is blocked from the web (`data/.htaccess`, root `.htaccess` rule, nginx example). Admin logins are throttled (5 failed attempts per 15 minutes per IP), unknown usernames take as long as wrong passwords, sessions end after 2 hours idle, and every admin action is CSRF protected
+- Admin page has a strict Content-Security-Policy (no JavaScript) via `admin/.htaccess`
+- Uploads: a file is only accepted when its content is detected as audio (or has a valid audio header); the extension-only fallback is gone, and the extension must be one of the allowed audio types
+- Stored files are served to the admin with a fixed audio type and `nosniff`, so a disguised upload can never run as a web page
+- Mail server errors are logged instead of shown to the customer
+- Portal notifications show server messages as plain text, never as HTML
+- Invalid language values no longer break the form handler
+- Example config: `script-src` no longer allows `'unsafe-inline'` (the portal has no inline scripts); install docs block `vendor/`, `composer.json` and `*.md`
+- Removed unused `validateFileContent()` code
 
 ## [0.9.3-beta] - 2026-03-21
 

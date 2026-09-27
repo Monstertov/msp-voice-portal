@@ -37,7 +37,7 @@ return [
     'security_headers' => [
         'content_security_policy' => [
             'default-src' => ["'self'"],
-            'script-src' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
+            'script-src' => ["'self'", 'cdnjs.cloudflare.com'],
             'style-src' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
             'style-src-elem' => ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
             'img-src' => ["'self'", 'data:', 'https:'],
@@ -111,7 +111,9 @@ return [
 
     // Admin page (<portal url>/admin/): users as 'username' => password hash.
     // Make a hash with: php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
+    // Off: /admin/ does not exist and submissions are only emailed, never stored.
     'admin' => [
+        'enabled' => false,
         'users' => [
             // 'admin' => '$2y$10$...',
         ],
@@ -122,9 +124,11 @@ return [
     // (data/.htaccess blocks it on Apache; see INSTALL.md for nginx).
     'storage_dir' => __DIR__ . '/data/',
 
-    // ElevenLabs AI voice. These are defaults: everything can be changed on the admin
-    // "AI settings" page, which saves to data/settings.json.
+    // ElevenLabs AI voice on the admin page (needs the admin page on). These are defaults:
+    // everything except 'enabled' can be changed on the admin "AI settings" page, which
+    // saves to data/settings.json. Off: the admin page only lists submissions.
     'elevenlabs' => [
+        'enabled' => false,
         'api_key' => '', // elevenlabs.io > Developers > API keys
         'voices' => [
             'en' => 'EXAVITQu4vr4xnSDxMaL', // Sarah, a standard ElevenLabs voice

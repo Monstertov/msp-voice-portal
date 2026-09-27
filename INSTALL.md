@@ -151,6 +151,9 @@ RewriteRule ^package\.json$ - [F,L]
 RewriteRule ^package-lock\.json$ - [F,L]
 RewriteRule ^logs/.*\.log$ - [F,L]
 RewriteRule ^data/ - [F,L]
+RewriteRule ^vendor/ - [F,L]
+RewriteRule ^composer\.json$ - [F,L]
+RewriteRule \.md$ - [F,L]
 RewriteRule ^config\.php$ - [F,L]
 RewriteRule ^\.htaccess$ - [F,L]
 RewriteRule ^test\.php$ - [F,L]
@@ -302,7 +305,9 @@ The admin page lives at `<your portal url>/admin/` (for example `https://example
 
 Submissions are kept in `data/` for `admin.retention_days` (default 30) and are deleted automatically after that.
 
-**1. Add an admin user** to `config.php` (see `config.example.php`). Passwords are stored as hashes:
+Both parts are optional and **off by default**. With the admin page off, `/admin/` returns 404 and submissions are only emailed, never stored. With ElevenLabs off, the admin page just lists submissions.
+
+**1. Turn on the admin page and add a user** in `config.php` (see `config.example.php`). Passwords are stored as hashes:
 
 ```bash
 php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
@@ -310,6 +315,7 @@ php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
 
 ```php
 'admin' => [
+    'enabled' => true,
     'users' => [
         'admin' => '$2y$10$...paste the hash here...',
     ],
@@ -317,9 +323,16 @@ php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
 ],
 ```
 
-**2. Add your ElevenLabs API key**, either in the `elevenlabs` section of `config.php` or on the admin **AI settings** page. That page also sets the default voice per portal language (Dutch, English), the models, voice tuning and the output format. Pick *WAV 8 kHz* for classic phone systems. Settings saved there go to `data/settings.json`, so updating the portal never overwrites them.
+**2. Turn on ElevenLabs** (optional) with `'elevenlabs' => ['enabled' => true, ...]` in `config.php`, and add your API key there or on the admin **AI settings** page. The active key is shown as `sk_ab12…wxyz`, so you can see which one is in use. The AI settings page also has:
 
-**3. Make sure `data/` is not reachable from the web.** The repository ships `data/.htaccess` for Apache; on nginx add `data/` to the deny rule above. Check it: `https://your-portal/data/.htaccess` must return 403.
+- a default voice per portal language (Dutch, English), with a Test button
+- a voice library: search ElevenLabs community voices by language, gender and keyword, listen, and add them to your account
+- models, voice tuning (stability, similarity, style, speed) and the output format. Pick *WAV 8 kHz* for classic phone systems.
+- your credit usage and voice slots
+
+Settings saved there go to `data/settings.json`, so updating the portal never overwrites them. Only the on/off switch has to stay in `config.php`.
+
+**3. Make sure `data/` is not reachable from the web.** The repository ships `data/.htaccess` for Apache; on nginx add `data/` to the deny rule above. Check it: `https://your-portal/data/.htaccess` must return 403. The repository also ships `admin/.htaccess`, which gives the admin page a strict Content-Security-Policy (it runs no JavaScript).
 
 ---
 

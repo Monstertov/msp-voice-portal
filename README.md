@@ -9,7 +9,7 @@
 [![CSS3](https://custom-icon-badges.demolab.com/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![Font Awesome](https://custom-icon-badges.demolab.com/badge/Font_Awesome-339AF0?logo=fontawesome&logoColor=white)](https://fontawesome.com/)
 
-A secure, mobile-friendly web portal for IT Managed Service Providers to collect audio recordings and text submissions from customers for VoIP service requests.
+A secure, mobile-friendly web portal for IT Managed Service Providers to collect audio recordings and text submissions from customers for VoIP service requests. An optional admin page turns those submissions into professional AI voice recordings with [ElevenLabs](https://elevenlabs.io), ready for your phone system.
 
 <details>
   <summary>Preview</summary>
@@ -26,7 +26,8 @@ A secure, mobile-friendly web portal for IT Managed Service Providers to collect
 - Severity levels: Normal, High, Emergency
 - CSRF protection, rate limiting, and secure file validation
 - Easy branding via config (logo, colors, title)
-- Admin page (`/admin/`) with ElevenLabs AI voice: text to speech, transcription and voice swap, in Dutch and English
+- Optional admin page (`/admin/`) to review, play, download and delete submissions
+- Optional ElevenLabs AI voice: text to speech, transcription and voice swap, with Dutch and English voices, a searchable voice library, and MP3 or phone-ready WAV output
 
 ## Installation
 
@@ -41,7 +42,12 @@ See [INSTALL.md](INSTALL.md) for full setup instructions.
 
 ## Admin & AI Voice
 
-Open `<portal url>/admin/` and sign in with a user from `config.php`. Every submission is listed with its recording and details. One click turns it into a professional AI voice (MP3, or WAV for phone systems) via ElevenLabs. Voices, models and sound are set on the **AI settings** page. See [INSTALL.md](INSTALL.md#9-admin-page--ai-voice-optional).
+Both are optional and off by default: the portal works on its own, emailing every submission as before.
+
+- **Admin page** (`'admin' => ['enabled' => true]` in `config.php`): open `<portal url>/admin/` and sign in with a user from `config.php`. Every submission is listed with its details and recording, kept for 30 days by default.
+- **ElevenLabs AI voice** (`'elevenlabs' => ['enabled' => true]`, needs the admin page): per submission, one click for **Generate AI voice** (text to speech), **Transcribe** (recording to editable text) or **Voice swap** (same words, AI voice). The **AI settings** page holds the API key (shown as `sk_ab12…wxyz` so you can see which key is active), a default voice per language (Dutch, English), models, voice tuning, output format (MP3, or WAV 8/16 kHz for phone systems), credit usage, and a searchable ElevenLabs voice library with previews.
+
+Setup: [INSTALL.md](INSTALL.md#9-admin-page--ai-voice-optional).
 
 ## Contributing
 
