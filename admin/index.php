@@ -3,6 +3,7 @@
 // Admin users live in config.php. AI settings: defaults from config.php, changes made on the
 // settings page are saved in data/settings.json (never in git, survives updates).
 $config = require dirname(__DIR__) . '/config.php';
+require dirname(__DIR__) . '/theme.php';
 $dataDir = $config['storage_dir'] ?? dirname(__DIR__) . '/data/';
 $users = $config['admin']['users'] ?? [];
 $settingsFile = $dataDir . 'settings.json';
@@ -380,8 +381,30 @@ function model_options($models, $cap, $selected) {
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Bootstrap parts of the admin page follow the colours from config.php too */
+        body { background-color: var(--bs-darker); color: var(--bs-light); }
+        .text-secondary, .form-text { color: var(--text-secondary) !important; }
+        h1, h2, .h4, .h5 { color: var(--text-primary); }
+        a { color: var(--primary-color); }
+        a:hover { color: var(--primary-hover); }
+        code { color: var(--primary-color); }
+        .form-control, .form-select { background-color: var(--bg-dark); border-color: var(--border-color); color: var(--bs-light); }
+        .form-control::placeholder { color: var(--text-secondary); }
+        .form-select:focus { border-color: var(--bs-primary); box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--bs-primary) 25%, transparent); }
+        .border-top { border-color: var(--border-color) !important; }
+        .btn-outline-secondary { color: var(--text-secondary); border-color: var(--border-color); }
+        .btn-outline-secondary:hover { background-color: var(--border-color); color: var(--text-primary); }
+        .btn-outline-danger { color: var(--danger-color); border-color: var(--danger-color); }
+        .btn-outline-danger:hover { background-color: var(--danger-color); border-color: var(--danger-color); color: #fff; }
+        .alert-danger { background-color: color-mix(in srgb, var(--danger-color) 15%, var(--bg-card)); border-color: var(--danger-color); color: var(--text-primary); }
+        .alert-success { background-color: color-mix(in srgb, var(--primary-color) 15%, var(--bg-card)); border-color: var(--primary-color); color: var(--text-primary); }
+        .text-bg-danger { background-color: var(--danger-color) !important; }
+        .text-danger { color: var(--danger-color) !important; }
+        .text-bg-dark { background-color: var(--bg-dark) !important; border: 1px solid var(--border-color); }
+    </style>
 </head>
-<body style="--primary-color: <?= h($config['primary_color'] ?? '#7289da') ?>; --primary-hover: <?= h($config['primary_hover'] ?? '#5b6eae') ?>;">
+<body style="<?= theme_css($config) ?>">
 <div class="container py-4" style="max-width: 900px;">
 <?php if ($flash): ?>
     <div class="alert alert-<?= $flash[1] ? 'success' : 'danger' ?>"><?= h($flash[0]) ?></div>

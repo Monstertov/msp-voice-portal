@@ -1,5 +1,12 @@
 <?php
 $config = require_once 'config.php';
+require_once __DIR__ . '/theme.php';
+
+// Input method selected when the page opens: record, upload or text
+$defaultMethod = $config['default_input_method'] ?? 'record';
+if (!in_array($defaultMethod, ['record', 'upload', 'text'], true)) {
+    $defaultMethod = 'record';
+}
 
 // Build Permissions-Policy header from config
 $permissions_policy = [];
@@ -50,7 +57,7 @@ error_reporting($config['error_handling']['error_reporting']);
     <meta name="apple-mobile-web-app-capable" content="no">
     <meta name="application-name" content="<?php echo htmlspecialchars($config['application_title']); ?>">
     <meta name="apple-mobile-web-app-title" content="<?php echo htmlspecialchars($config['application_title']); ?>">
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="<?php echo htmlspecialchars(theme_colors($config)['field']); ?>">
     <title><?php echo htmlspecialchars($config['application_title']); ?></title>
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
@@ -64,7 +71,7 @@ error_reporting($config['error_handling']['error_reporting']);
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
 </head>
-<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>" data-default-lang="<?php echo htmlspecialchars($config['default_language']); ?>" style="--primary-color: <?php echo htmlspecialchars($config['primary_color']); ?>; --primary-hover: <?php echo htmlspecialchars($config['primary_hover']); ?>;">
+<body data-support-email="<?php echo htmlspecialchars($config['support']['email']); ?>" data-default-lang="<?php echo htmlspecialchars($config['default_language']); ?>" style="<?php echo theme_css($config); ?>">
     <div class="container py-2">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -94,19 +101,19 @@ error_reporting($config['error_handling']['error_reporting']);
                                 <label class="form-label" data-i18n="recordingMethod">Recording Method</label>
                                 <div class="recording-method-container">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="inputMethod" id="recordAudio" value="record" checked>
+                                        <input class="form-check-input" type="radio" name="inputMethod" id="recordAudio" value="record" <?php echo $defaultMethod === 'record' ? 'checked' : ''; ?>>
                                         <label class="form-check-label" for="recordAudio">
                                             <i class="fas fa-microphone"></i> <span data-i18n="recordAudio">Record Audio</span>
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="inputMethod" id="uploadAudio" value="upload">
+                                        <input class="form-check-input" type="radio" name="inputMethod" id="uploadAudio" value="upload" <?php echo $defaultMethod === 'upload' ? 'checked' : ''; ?>>
                                         <label class="form-check-label" for="uploadAudio">
                                             <i class="fas fa-upload"></i> <span data-i18n="uploadAudio">Upload Audio</span>
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="inputMethod" id="textInput" value="text">
+                                        <input class="form-check-input" type="radio" name="inputMethod" id="textInput" value="text" <?php echo $defaultMethod === 'text' ? 'checked' : ''; ?>>
                                         <label class="form-check-label" for="textInput">
                                             <i class="fas fa-font"></i> <span data-i18n="textInput">Text Input</span>
                                         </label>
@@ -115,7 +122,7 @@ error_reporting($config['error_handling']['error_reporting']);
                             </div>
 
                             <!-- Audio Recording Section -->
-                            <div id="recordingSection" class="input-section active">
+                            <div id="recordingSection" class="input-section<?php echo $defaultMethod === 'record' ? ' active' : ''; ?>">
                                 <div class="recording-controls d-flex align-items-center gap-2">
                                     <button type="button" id="startRecording" class="btn btn-primary record-button" data-max-duration="<?php echo isset($config['recording_max_duration']) ? (int)$config['recording_max_duration'] : 60; ?>">
                                         <i class="fas fa-microphone"></i> <span id="recordButtonText" data-i18n="startRecording">Start Recording</span>
@@ -145,7 +152,7 @@ error_reporting($config['error_handling']['error_reporting']);
                             </div>
 
                             <!-- File Upload Section -->
-                            <div id="uploadSection" class="input-section">
+                            <div id="uploadSection" class="input-section<?php echo $defaultMethod === 'upload' ? ' active' : ''; ?>">
                                 <label for="audioFile" class="form-label" data-i18n="uploadAudioFile">Upload Audio File</label>
                                 <div class="custom-file-group">
                                     <input type="file" class="custom-file-input" id="audioFile" name="audioFile" accept=".mp3,.wav,.mp4,.webm,.ogg,.aac,.m4a,audio/mpeg,audio/wav,audio/mp4,audio/webm,audio/ogg,audio/aac,audio/x-m4a">
@@ -156,7 +163,7 @@ error_reporting($config['error_handling']['error_reporting']);
                             </div>
 
                             <!-- Text Input Section -->
-                            <div id="textSection" class="input-section">
+                            <div id="textSection" class="input-section<?php echo $defaultMethod === 'text' ? ' active' : ''; ?>">
                                 <label for="textContent" class="form-label" data-i18n="enterText">Enter Text</label>
                                 <textarea class="form-control" id="textContent" name="textContent" rows="5"></textarea>
                             </div>

@@ -25,7 +25,7 @@ A secure, mobile-friendly web portal for IT Managed Service Providers to collect
 - Multi-language support (English & Dutch)
 - Severity levels: Normal, High, Emergency
 - CSRF protection, rate limiting, and secure file validation
-- Easy branding via config (logo, colors, title)
+- Easy branding via config: title, logo, every colour (portal and admin page), and which input method opens first
 - Optional admin page (`/admin/`) to review, play, download and delete submissions
 - Optional ElevenLabs AI voice: text to speech, transcription and voice swap, with Dutch and English voices, a searchable voice library, and MP3 or phone-ready WAV output
 

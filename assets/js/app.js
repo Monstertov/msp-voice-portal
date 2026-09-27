@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
             recordButton.setAttribute('style', 'display: inline-block !important; visibility: visible !important;');
         }
         
-        if (recordingSection) {
+        // Only when recording is the selected method (config default_input_method can pick another)
+        const recordRadio = document.getElementById('recordAudio');
+        if (recordingSection && (!recordRadio || recordRadio.checked)) {
             recordingSection.classList.add('active');
             recordingSection.style.display = 'block !important';
             recordingSection.style.opacity = '1 !important';
@@ -543,6 +545,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Apply the method selected when the page opens (sets the right required fields)
+    const initialMethod = document.querySelector('input[name="inputMethod"]:checked');
+    if (initialMethod) {
+        initialMethod.dispatchEvent(new Event('change'));
+    }
 
     // Get max recording duration from button data attribute
     const maxRecordingDuration = parseInt(recordButton.getAttribute('data-max-duration'), 10) || 60;

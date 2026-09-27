@@ -310,7 +310,7 @@ Both parts are optional and **off by default**. With the admin page off, `/admin
 **1. Turn on the admin page and add a user** in `config.php` (see `config.example.php`). Passwords are stored as hashes:
 
 ```bash
-php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
+php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_DEFAULT), PHP_EOL;'
 ```
 
 ```php
@@ -322,6 +322,8 @@ php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
     'retention_days' => 30,
 ],
 ```
+
+Type the password and press Enter; the command prints the hash. It reads the password instead of taking it on the command line, so special characters like `$` or `)` just work. **To reset a forgotten password** or replace one, run the same command and paste the new hash over the old one.
 
 **2. Turn on ElevenLabs** (optional) with `'elevenlabs' => ['enabled' => true, ...]` in `config.php`, and add your API key there or on the admin **AI settings** page. The active key is shown as `sk_ab12…wxyz`, so you can see which one is in use. The AI settings page also has:
 

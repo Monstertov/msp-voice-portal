@@ -25,7 +25,12 @@ All notable changes to this project will be documented in this file.
 - Example config: `script-src` no longer allows `'unsafe-inline'` (the portal has no inline scripts); install docs block `vendor/`, `composer.json` and `*.md`
 - Removed unused `validateFileContent()` code
 
+- All colours in `config.php` (`colors`: primary, background, card, field, text, heading, muted, border, focus, danger and their hovers), used by both the portal and the admin page. Defaults are the existing colours; older `primary_color` / `primary_hover` keys still work
+- `default_input_method` in `config.php`: which option is open when the page loads (`record`, `upload` or `text`)
+- Password reset instructions in `config.php` / `config.example.php`; the hash command reads the password from input, so special characters work
+
 ### Fixed
+- Accent-coloured focus rings, hover tints and the drag-and-drop highlight referenced an undefined CSS variable and never showed; they now use the configured primary colour
 - Works on PHP 7.3 and newer again (no PHP 8-only functions)
 - Permissions-Policy header now uses valid syntax (`camera=(self)`, `geolocation=()`), whether config values are written as `'self'`, `self`, `'none'` or `()`
 

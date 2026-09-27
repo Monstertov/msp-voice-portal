@@ -21,11 +21,27 @@ return [
 
     // Application Settings
     'application_title' => 'MSP Voice Portal',
-    'primary_color' => '#7289da', // Default primary color for accents and buttons
-    'primary_hover' => '#5b6eae', // Hover/active shade of the primary color
+    // Colours of the portal and the admin page. Any CSS colour: '#7289da', 'white', 'rgb(0, 0, 0)'.
+    // Leave a line out to keep its default. (Older configs with 'primary_color' and
+    // 'primary_hover' at this level still work.)
+    'colors' => [
+        'primary'       => '#7289da', // buttons, links, accents
+        'primary_hover' => '#5b6eae', // hover/active shade of primary
+        'background'    => '#141414', // page background
+        'card'          => '#2d2d2d', // cards and panels
+        'field'         => '#1a1a1a', // input fields and dark areas
+        'text'          => '#f8f9fa', // body text
+        'heading'       => '#ffffff', // headings and strong text
+        'muted'         => '#b9bbbe', // labels and secondary text
+        'border'        => '#404040',
+        'focus'         => '#0d6efd', // outline of the text field being typed in
+        'danger'        => '#ed4245', // stop/delete buttons and errors
+        'danger_hover'  => '#c03537',
+    ],
     'require_notes' => true,
     'max_file_size' => 10 * 1024 * 1024, // 10MB
     'default_language' => 'en',
+    'default_input_method' => 'record', // option open when the page loads: 'record', 'upload' or 'text'
 
     // MSP Support Contact Configuration
     'support' => [
@@ -109,8 +125,11 @@ return [
     // Example: 60 for 1 minute, 180 for 3 minutes
     'recording_max_duration' => 60,
 
-    // Admin page (<portal url>/admin/): users as 'username' => password hash.
-    // Make a hash with: php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
+    // Admin page (<portal url>/admin/): users as 'username' => password hash, never the password itself.
+    // Set, reset or replace a password: on the server run
+    //     php -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_DEFAULT), PHP_EOL;'
+    // type the new password, press Enter, and paste the output ($2y$...) between the quotes
+    // after the username. Add a line for another user, delete a line to remove one.
     // Off: /admin/ does not exist and submissions are only emailed, never stored.
     'admin' => [
         'enabled' => false,
