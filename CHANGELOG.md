@@ -24,6 +24,10 @@ All notable changes to this project will be documented in this file.
 - Example config: `script-src` no longer allows `'unsafe-inline'` (the portal has no inline scripts); install docs block `vendor/`, `composer.json` and `*.md`
 - Removed unused `validateFileContent()` code
 
+### Fixed
+- Works on PHP 7.3 and newer again (no PHP 8-only functions)
+- Permissions-Policy header now uses valid syntax (`camera=(self)`, `geolocation=()`), whether config values are written as `'self'`, `self`, `'none'` or `()`
+
 ## [0.9.3-beta] - 2026-03-21
 
 ### Added

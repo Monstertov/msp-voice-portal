@@ -3,8 +3,10 @@ $config = require_once 'config.php';
 
 // Build Permissions-Policy header from config
 $permissions_policy = [];
+// Header syntax is feature=(self) or feature=() for off; config may say 'self', self, 'none' or ()
 foreach ($config['security_headers']['permissions_policy'] as $feature => $value) {
-    $permissions_policy[] = $feature . '=' . $value;
+    $value = trim($value, "'\" ()");
+    $permissions_policy[] = $feature . '=(' . ($value === 'none' ? '' : $value) . ')';
 }
 header("Permissions-Policy: " . implode(', ', $permissions_policy));
 

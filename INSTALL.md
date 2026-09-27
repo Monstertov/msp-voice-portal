@@ -20,7 +20,7 @@ Then configure your web server to point to the project root and ensure HTTPS is 
 
 | Requirement | Minimum |
 |---|---|
-| PHP | 8.0 or newer |
+| PHP | 7.3 or newer (8.x recommended) |
 | PHP extensions | `fileinfo`, `json`, `session`, `curl` (admin AI voice) |
 | Web server | Apache 2.4+ (with `mod_rewrite`, `mod_headers`) or Nginx |
 | Composer | Required (manages PHPMailer) |

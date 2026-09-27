@@ -49,7 +49,7 @@ $aiOn = !empty($config['elevenlabs']['enabled']);
 
 session_name('msp_admin');
 session_start(['cookie_httponly' => true, 'cookie_secure' => true, 'cookie_samesite' => 'Strict']);
-$csrf = $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+$csrf = $_SESSION['csrf'] = $_SESSION['csrf'] ?? bin2hex(random_bytes(32));
 if (!empty($_SESSION['admin']) && time() - ($_SESSION['seen'] ?? 0) > 7200) {
     unset($_SESSION['admin']); // signed out after 2 hours without activity
 }
@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ---- Voice library preview: proxied, because the page only loads media from itself ----
 if (isset($_GET['libpreview'])) {
     $url = $_SESSION['lib'][str($_GET['libpreview'])]['url'] ?? '';
-    if (empty($_SESSION['admin']) || !$aiOn || !str_starts_with($url, 'https://storage.googleapis.com/')) {
+    if (empty($_SESSION['admin']) || !$aiOn || strpos($url, 'https://storage.googleapis.com/') !== 0) {
         http_response_code(404);
         exit('Not found');
     }
@@ -631,7 +631,7 @@ function model_options($models, $cap, $selected) {
     <?php foreach ($dirs as $mf):
         $m = json_decode(file_get_contents($mf), true);
         $id = basename(dirname($mf));
-        $aiFiles = array_filter(glob(dirname($mf) . '/ai-*') ?: [], fn($f) => preg_match('/\.(mp3|wav)$/', $f));
+        $aiFiles = array_filter(glob(dirname($mf) . '/ai-*') ?: [], function ($f) { return preg_match('/\.(mp3|wav)$/', $f); });
         rsort($aiFiles);
         $text = plain($m['transcript'] ?? $m['textContent'] ?? '');
         $lang = $m['lang'] ?? '';
@@ -664,7 +664,7 @@ function model_options($models, $cap, $selected) {
             <?php foreach ($aiFiles as $af): $name = basename($af); ?>
                 <div class="mb-2">
                     <div class="small text-secondary">
-                        AI voice (<?= str_contains($name, '-swap.') ? 'voice swap' : 'text' ?>, <?= h(date('d-m H:i', filemtime($af))) ?>)
+                        AI voice (<?= strpos($name, '-swap.') !== false ? 'voice swap' : 'text' ?>, <?= h(date('d-m H:i', filemtime($af))) ?>)
                         · <a href="?file=<?= h("$id/$name") ?>&amp;download=1">Download <?= h(strtoupper(pathinfo($name, PATHINFO_EXTENSION))) ?></a>
                     </div>
                     <audio controls preload="none" class="w-100" src="?file=<?= h("$id/$name") ?>"></audio>
