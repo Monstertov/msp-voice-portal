@@ -118,6 +118,9 @@ return [
             // 'admin' => '$2y$10$...',
         ],
         'retention_days' => 30, // stored submissions are deleted after this many days
+        // Emails link straight to the submission on the admin page. The address is worked out
+        // automatically; set it here only if that goes wrong (e.g. behind an unusual proxy):
+        // 'url' => 'https://example.com/portal/admin/',
     ],
 
     // Where submissions and AI voice files are kept. Must not be reachable from the web

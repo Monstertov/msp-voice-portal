@@ -44,7 +44,7 @@ See [INSTALL.md](INSTALL.md) for full setup instructions.
 
 Both are optional and off by default: the portal works on its own, emailing every submission as before.
 
-- **Admin page** (`'admin' => ['enabled' => true]` in `config.php`): open `<portal url>/admin/` and sign in with a user from `config.php`. Every submission is listed with its details and recording, kept for 30 days by default.
+- **Admin page** (`'admin' => ['enabled' => true]` in `config.php`): open `<portal url>/admin/` and sign in with a user from `config.php`. Every submission is listed with its details and recording, kept for 30 days by default. Each notification email links straight to the submission there.
 - **ElevenLabs AI voice** (`'elevenlabs' => ['enabled' => true]`, needs the admin page): per submission, one click for **Generate AI voice** (text to speech), **Transcribe** (recording to editable text) or **Voice swap** (same words, AI voice). The **AI settings** page holds the API key (shown as `sk_ab12…wxyz` so you can see which key is active), a default voice per language (Dutch, English), models, voice tuning, output format (MP3, or WAV 8/16 kHz for phone systems), credit usage, and a searchable ElevenLabs voice library with previews.
 
 Setup: [INSTALL.md](INSTALL.md#9-admin-page--ai-voice-optional).

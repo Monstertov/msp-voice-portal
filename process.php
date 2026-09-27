@@ -242,7 +242,28 @@ function generate_email_subject($severity, $company_name) {
 }
 
 // Function to send email
-function send_email($config, $data, $attachment_path = null) {
+// Link to the admin page, worked out from this request so it is right however the portal is
+// installed (domain, subfolder, port). Set admin.url in config.php to use a fixed address instead.
+// Returns null when the admin page is off.
+function admin_url($config) {
+    if (empty($config['admin']['enabled']) || empty($config['admin']['users'])) {
+        return null;
+    }
+    if (!empty($config['admin']['url'])) {
+        return $config['admin']['url'];
+    }
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
+        || ($_SERVER['SERVER_PORT'] ?? '') == 443;
+    $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
+    if (!preg_match('/^[A-Za-z0-9.-]+(:\d+)?$/', $host)) {
+        return null;
+    }
+    $path = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+    return ($https ? 'https' : 'http') . '://' . $host . $path . '/admin/';
+}
+
+function send_email($config, $data, $attachment_path = null, $admin_link = null) {
     $mail = new PHPMailer(true);
 
     try {
@@ -301,6 +322,10 @@ function send_email($config, $data, $attachment_path = null) {
         
         // Build email body
         $body = "<h2>New MSP Voice Portal Recording Submission</h2>";
+        if ($admin_link) {
+            $link = htmlspecialchars($admin_link, ENT_QUOTES, 'UTF-8');
+            $body .= "<p><strong>Open in admin portal:</strong> <a href=\"$link\">$link</a></p>";
+        }
         $body .= "<p><strong>Input Method:</strong> " . ucfirst($data['inputMethod']) . "</p>";
         $body .= "<p><strong>Company Name:</strong> " . $data['companyName'] . "</p>";
         $body .= "<p><strong>Contact Email:</strong> " . $data['contactEmail'] . "</p>";
@@ -339,7 +364,7 @@ function send_email($config, $data, $attachment_path = null) {
 
 // Store a submission in data/<id>/ (meta.json + original audio) for the admin page.
 // Submissions older than admin.retention_days are removed here too, so no cron is needed.
-function store_submission($config, $data, $attachment_path) {
+function store_submission($config, $data, $attachment_path, $id) {
     $dir = $config['storage_dir'] ?? __DIR__ . '/data/';
     $cutoff = time() - ($config['admin']['retention_days'] ?? 30) * 86400;
     foreach (glob($dir . '*', GLOB_ONLYDIR) ?: [] as $old) {
@@ -349,7 +374,6 @@ function store_submission($config, $data, $attachment_path) {
         }
     }
 
-    $id = date('Ymd-His') . '-' . bin2hex(random_bytes(4));
     if (!mkdir($dir . $id, 0755, true)) {
         throw new Exception('Cannot create ' . $dir . $id);
     }
@@ -588,9 +612,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Send email
+        // Send email, with a direct link to this submission on the admin page when that is on
+        $submission_id = date('Ymd-His') . '-' . bin2hex(random_bytes(4));
+        $admin_link = admin_url($config);
+        if ($admin_link) {
+            $admin_link .= '#s-' . $submission_id;
+        }
         try {
-            $sent = send_email($config, $data, $attachment_path);
+            $sent = send_email($config, $data, $attachment_path, $admin_link);
         } catch (Exception $e) {
             throw new Exception($translations[$currentLang]['submission_failed']);
         }
@@ -601,7 +630,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Keep the submission for the admin page; the email already went out, so a storage
             // problem is only logged
             try {
-                if (!empty($config['admin']['enabled'])) store_submission($config, $data, $attachment_path);
+                if (!empty($config['admin']['enabled'])) store_submission($config, $data, $attachment_path, $submission_id);
             } catch (Throwable $e) {
                 log_error("Storing submission failed", ['error' => $e->getMessage()]);
             }

@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - On/off switches in `config.php`: `admin.enabled` and `elevenlabs.enabled`, both off by default. The portal works exactly as before without them
 - Voice library on the AI settings page: search ElevenLabs community voices by language, gender and keyword, preview them and add them to your account
 - The active API key is shown as `sk_ab12…wxyz` in the admin header and on the AI settings page
+- Notification emails link straight to the submission on the admin page (when it is on). The address is worked out from the request, so it is right whether the portal runs on its own domain, in a subfolder or on a custom port; `admin.url` in `config.php` can set it by hand
 
 ### Security
 - `data/` is blocked from the web (`data/.htaccess`, root `.htaccess` rule, nginx example). Admin logins are throttled (5 failed attempts per 15 minutes per IP), unknown usernames take as long as wrong passwords, sessions end after 2 hours idle, and every admin action is CSRF protected
