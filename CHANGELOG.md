@@ -24,6 +24,8 @@ All notable changes to this project will be documented in this file.
 - Invalid language values no longer break the form handler
 - Example config: `script-src` no longer allows `'unsafe-inline'` (the portal has no inline scripts); install docs block `vendor/`, `composer.json` and `*.md`
 - Removed unused `validateFileContent()` code
+- Install docs: `.htaccess` also blocks path tricks like `config.php/` or `index.php/…`, plus `config.example.php`, `theme.php` and `LICENSE`
+- PHPMailer 7.1.1
 
 - All colours in `config.php` (`colors`: primary, background, card, field, text, heading, muted, border, focus, danger and their hovers), used by both the portal and the admin page. Defaults are the existing colours; older `primary_color` / `primary_hover` keys still work
 - `default_input_method` in `config.php`: which option is open when the page loads (`record`, `upload` or `text`)
