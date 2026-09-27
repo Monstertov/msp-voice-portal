@@ -26,6 +26,7 @@ A secure, mobile-friendly web portal for IT Managed Service Providers to collect
 - Severity levels: Normal, High, Emergency
 - CSRF protection, rate limiting, and secure file validation
 - Easy branding via config (logo, colors, title)
+- Admin page (`/admin/`) with ElevenLabs AI voice: text to speech, transcription and voice swap, in Dutch and English
 
 ## Installation
 
@@ -37,6 +38,10 @@ See [INSTALL.md](INSTALL.md) for full setup instructions.
 2. Fill in company name, contact email, phone, and notes
 3. Select a severity level
 4. Submit
+
+## Admin & AI Voice
+
+Open `<portal url>/admin/` and sign in with a user from `config.php`. Every submission is listed with its recording and details. One click turns it into a professional AI voice (MP3, or WAV for phone systems) via ElevenLabs. Voices, models and sound are set on the **AI settings** page. See [INSTALL.md](INSTALL.md#9-admin-page--ai-voice-optional).
 
 ## Contributing
 
@@ -53,7 +58,7 @@ Contributions are welcome. [Open an issue](https://github.com/Monstertov/msp-voi
 - [x] Configurable primary color accent in config
 - [x] Remember company name/email from previous submissions
 - [x] Play back recordings before submission
-- [ ] ElevenLabs integration
+- [x] ElevenLabs integration
 - [x] Custom styled audio playback
 
 ### Technical

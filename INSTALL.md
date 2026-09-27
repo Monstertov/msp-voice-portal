@@ -8,8 +8,8 @@ cd msp-voice-portal
 composer install
 cp config.example.php config.php
 # Edit config.php with your SMTP and support email settings
-mkdir -p uploads logs
-chmod 755 uploads logs
+mkdir -p uploads logs data
+chmod 755 uploads logs data
 ```
 
 Then configure your web server to point to the project root and ensure HTTPS is active.
@@ -21,7 +21,7 @@ Then configure your web server to point to the project root and ensure HTTPS is 
 | Requirement | Minimum |
 |---|---|
 | PHP | 8.0 or newer |
-| PHP extensions | `fileinfo`, `json`, `session` |
+| PHP extensions | `fileinfo`, `json`, `session`, `curl` (admin AI voice) |
 | Web server | Apache 2.4+ (with `mod_rewrite`, `mod_headers`) or Nginx |
 | Composer | Required (manages PHPMailer) |
 | HTTPS | Required — microphone access and secure session cookies need a valid TLS certificate |
@@ -106,24 +106,24 @@ return [
 ## 4. Create Required Directories
 
 ```bash
-mkdir -p uploads logs
-chmod 755 uploads logs
+mkdir -p uploads logs data
+chmod 755 uploads logs data
 ```
 
 Set ownership to your web server user:
 
 ```bash
 # Apache on Debian/Ubuntu
-chown www-data:www-data uploads logs
+chown www-data:www-data uploads logs data
 
 # Apache on RHEL/CentOS
-chown apache:apache uploads logs
+chown apache:apache uploads logs data
 
 # Plesk
-chown psaserv:psaserv uploads logs
+chown psaserv:psaserv uploads logs data
 
 # cPanel / DirectAdmin — your account user owns the files
-chown yourusername:yourusername uploads logs
+chown yourusername:yourusername uploads logs data
 ```
 
 ---
@@ -150,6 +150,7 @@ RewriteRule ^composer\.lock$ - [F,L]
 RewriteRule ^package\.json$ - [F,L]
 RewriteRule ^package-lock\.json$ - [F,L]
 RewriteRule ^logs/.*\.log$ - [F,L]
+RewriteRule ^data/ - [F,L]
 RewriteRule ^config\.php$ - [F,L]
 RewriteRule ^\.htaccess$ - [F,L]
 RewriteRule ^test\.php$ - [F,L]
@@ -240,7 +241,7 @@ server {
     }
 
     # Block sensitive files
-    location ~* ^/(config\.php|\.htaccess|\.git|logs/|vendor/) {
+    location ~* ^/(config\.php|\.htaccess|\.git|logs/|data/|vendor/) {
         deny all;
     }
 
@@ -291,7 +292,38 @@ Set your brand colour in `config.php`:
 
 ---
 
-## 9. Verify the Installation
+## 9. Admin Page & AI Voice (optional)
+
+The admin page lives at `<your portal url>/admin/` (for example `https://example.com/portal/admin/`). Admins can see recent submissions, play and download them, and turn them into a professional AI voice with [ElevenLabs](https://elevenlabs.io):
+
+- **Generate AI voice**: reads text aloud (a typed submission, a transcript, or anything you type).
+- **Transcribe**: turns a recording into editable text, which you can then generate as AI voice.
+- **Voice swap**: keeps the caller's words and timing but replaces their voice.
+
+Submissions are kept in `data/` for `admin.retention_days` (default 30) and are deleted automatically after that.
+
+**1. Add an admin user** to `config.php` (see `config.example.php`). Passwords are stored as hashes:
+
+```bash
+php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
+```
+
+```php
+'admin' => [
+    'users' => [
+        'admin' => '$2y$10$...paste the hash here...',
+    ],
+    'retention_days' => 30,
+],
+```
+
+**2. Add your ElevenLabs API key**, either in the `elevenlabs` section of `config.php` or on the admin **AI settings** page. That page also sets the default voice per portal language (Dutch, English), the models, voice tuning and the output format. Pick *WAV 8 kHz* for classic phone systems. Settings saved there go to `data/settings.json`, so updating the portal never overwrites them.
+
+**3. Make sure `data/` is not reachable from the web.** The repository ships `data/.htaccess` for Apache; on nginx add `data/` to the deny rule above. Check it: `https://your-portal/data/.htaccess` must return 403.
+
+---
+
+## 10. Verify the Installation
 
 1. Open your domain in a browser — the portal should load in your configured default language
 2. Try recording a short audio clip and submitting the form

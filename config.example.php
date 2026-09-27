@@ -108,4 +108,31 @@ return [
     // Maximum recording duration in seconds (frontend enforced)
     // Example: 60 for 1 minute, 180 for 3 minutes
     'recording_max_duration' => 60,
+
+    // Admin page (<portal url>/admin/): users as 'username' => password hash.
+    // Make a hash with: php -r 'echo password_hash("your-password", PASSWORD_DEFAULT), "\n";'
+    'admin' => [
+        'users' => [
+            // 'admin' => '$2y$10$...',
+        ],
+        'retention_days' => 30, // stored submissions are deleted after this many days
+    ],
+
+    // Where submissions and AI voice files are kept. Must not be reachable from the web
+    // (data/.htaccess blocks it on Apache; see INSTALL.md for nginx).
+    'storage_dir' => __DIR__ . '/data/',
+
+    // ElevenLabs AI voice. These are defaults: everything can be changed on the admin
+    // "AI settings" page, which saves to data/settings.json.
+    'elevenlabs' => [
+        'api_key' => '', // elevenlabs.io > Developers > API keys
+        'voices' => [
+            'en' => 'EXAVITQu4vr4xnSDxMaL', // Sarah, a standard ElevenLabs voice
+            'nl' => '',                     // empty = use the English voice (it speaks Dutch too)
+        ],
+        'tts_model' => 'eleven_multilingual_v2',
+        'sts_model' => 'eleven_multilingual_sts_v2',
+        'stt_model' => 'scribe_v1',
+        'output_format' => 'mp3_44100_128', // or pcm_8000 / pcm_16000 for WAV (phone systems)
+    ],
 ]; 

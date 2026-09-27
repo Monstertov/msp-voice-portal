@@ -340,6 +340,35 @@ function send_email($config, $data, $attachment_path = null) {
     }
 }
 
+// Store a submission in data/<id>/ (meta.json + original audio) for the admin page.
+// Submissions older than admin.retention_days are removed here too, so no cron is needed.
+function store_submission($config, $data, $attachment_path) {
+    $dir = $config['storage_dir'] ?? __DIR__ . '/data/';
+    $cutoff = time() - ($config['admin']['retention_days'] ?? 30) * 86400;
+    foreach (glob($dir . '*', GLOB_ONLYDIR) ?: [] as $old) {
+        if (filemtime($old) < $cutoff) {
+            array_map('unlink', glob($old . '/*'));
+            rmdir($old);
+        }
+    }
+
+    $id = date('Ymd-His') . '-' . bin2hex(random_bytes(4));
+    if (!mkdir($dir . $id, 0755, true)) {
+        throw new Exception('Cannot create ' . $dir . $id);
+    }
+
+    $audio = null;
+    if ($attachment_path && file_exists($attachment_path)) {
+        $ext = strtolower(pathinfo($attachment_path, PATHINFO_EXTENSION));
+        $audio = 'original.' . (in_array($ext, ['mp3', 'wav', 'mp4', 'webm', 'ogg', 'aac', 'm4a'], true) ? $ext : 'bin');
+        rename($attachment_path, "$dir$id/$audio");
+    }
+
+    $meta = $data + ['created_at' => date('c'), 'audio' => $audio];
+    file_put_contents("$dir$id/meta.json", json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    log_error("Submission stored", ['id' => $id]);
+}
+
 // Process the form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
@@ -432,7 +461,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'contactPhone' => sanitize_input($_POST['contactPhone'] ?? ''),
             'notes' => sanitize_input($_POST['notes'] ?? ''),
             'textContent' => sanitize_input($_POST['textContent'] ?? ''),
-            'email_subject' => sanitize_input($_POST['email_subject'] ?? 'MSP Voice Portal Request')
+            'email_subject' => sanitize_input($_POST['email_subject'] ?? 'MSP Voice Portal Request'),
+            // Portal language, so the admin page picks the matching AI voice
+            'lang' => isset($translations[$currentLang]) ? $currentLang : $config['default_language']
         ];
 
         // Store in session
@@ -561,11 +592,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['success'] = true;
             $response['message'] = $translations[$currentLang]['submission_success'];
             
-            // Clean up attachment after successful email send
+            // Keep the submission for the admin page; the email already went out, so a storage
+            // problem is only logged
+            try {
+                store_submission($config, $data, $attachment_path);
+            } catch (Throwable $e) {
+                log_error("Storing submission failed", ['error' => $e->getMessage()]);
+            }
             if ($attachment_path && file_exists($attachment_path)) {
-                log_error("Cleaning up attachment file", [
-                    'path' => $attachment_path
-                ]);
                 unlink($attachment_path);
             }
         } else {

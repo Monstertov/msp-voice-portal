@@ -4,6 +4,10 @@
 # Ignore uploads directory
 uploads/
 
+# Stored submissions, AI voice files and admin settings (keep the .htaccess that blocks it)
+data/*
+!data/.htaccess
+
 # Ignore vendor directory
 vendor/
 

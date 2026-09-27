@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0-beta] - 2026-09-27
+
+### Added
+- Admin page at `/admin/`: sign in with users from `config.php`, see recent submissions with their recordings, download them, delete them
+- ElevenLabs AI voice on the admin page: generate AI voice from text, transcribe recordings to editable text, and voice swap recordings
+- AI settings page: API key, default voice per portal language (Dutch, English), models, voice tuning (stability, similarity, style, speed) and output format (MP3 or WAV 8/16 kHz for phone systems), plus a test button and credit usage. Saved to `data/settings.json`
+- Submissions are now stored in `data/` (kept for `admin.retention_days`, default 30) in addition to being emailed
+
+### Security
+- `data/` is blocked from the web (`data/.htaccess`, root `.htaccess` rule, nginx example). Admin logins are throttled (5 failed attempts per 15 minutes per IP) and every admin action is CSRF protected
+
 ## [0.9.3-beta] - 2026-03-21
 
 ### Added
