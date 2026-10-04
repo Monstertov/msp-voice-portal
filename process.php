@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/tracking.php';
 require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -30,7 +31,7 @@ function generate_csrf_token() {
 
 // Function to validate CSRF token
 function validate_csrf_token($token) {
-    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    return is_string($token) && isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
 // Function to check rate limiting
@@ -399,7 +400,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate CSRF token
         if (!isset($_POST['csrf_token']) || !validate_csrf_token($_POST['csrf_token'])) {
             log_error("Invalid CSRF token", [
-                'token' => $_POST['csrf_token'] ?? 'not set'
+                'had_token' => isset($_POST['csrf_token'])
             ]);
             throw new Exception('Invalid security token');
         }
@@ -642,7 +643,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } catch (Exception $e) {
-        $response['message'] = $e->getMessage();
+        $response['message'] = 'Unable to process your request. Please try again.';
         log_error("Form submission error", [
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString()

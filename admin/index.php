@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/tracking.php';
 // Admin page: sign in, see stored submissions, make AI voice versions with ElevenLabs.
 // Admin users live in config.php. AI settings: defaults from config.php, changes made on the
 // settings page are saved in data/settings.json (never in git, survives updates).
