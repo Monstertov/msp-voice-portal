@@ -2,12 +2,14 @@
 
 # MSP Voice Portal
 
-[![PHP](https://custom-icon-badges.demolab.com/badge/PHP-777BB4?logo=php&logoColor=white)](https://www.php.net/)
-[![Bootstrap](https://custom-icon-badges.demolab.com/badge/Bootstrap-7952B3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-[![JavaScript](https://custom-icon-badges.demolab.com/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![HTML5](https://custom-icon-badges.demolab.com/badge/HTML5-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://custom-icon-badges.demolab.com/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-[![Font Awesome](https://custom-icon-badges.demolab.com/badge/Font_Awesome-339AF0?logo=fontawesome&logoColor=white)](https://fontawesome.com/)
+<p align="center">
+  <a href="https://www.php.net/" target="_blank"><img src="https://custom-icon-badges.demolab.com/badge/PHP-777BB4?logo=php&logoColor=white" alt="PHP" /></a>
+  <a href="https://getbootstrap.com/" target="_blank"><img src="https://custom-icon-badges.demolab.com/badge/Bootstrap-7952B3?logo=bootstrap&logoColor=white" alt="Bootstrap" /></a>
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank"><img src="https://custom-icon-badges.demolab.com/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" /></a>
+  <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank"><img src="https://custom-icon-badges.demolab.com/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" /></a>
+  <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank"><img src="https://custom-icon-badges.demolab.com/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" /></a>
+  <a href="https://fontawesome.com/" target="_blank"><img src="https://custom-icon-badges.demolab.com/badge/Font_Awesome-339AF0?logo=fontawesome&logoColor=white" alt="Font Awesome" /></a>
+</p>
 
 A secure, mobile-friendly web portal for IT Managed Service Providers to collect audio recordings and text submissions from customers for VoIP service requests. An optional admin page turns those submissions into professional AI voice recordings with [ElevenLabs](https://elevenlabs.io), ready for your phone system.
 
