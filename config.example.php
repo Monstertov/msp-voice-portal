@@ -167,8 +167,6 @@ return [
             'nl' => '',                     // empty = use the English voice (it speaks Dutch too)
         ],
         'tts_model' => 'eleven_multilingual_v2',
-        'sts_model' => 'eleven_multilingual_sts_v2',
-        'stt_model' => 'scribe_v1',
         'output_format' => 'mp3_44100_128', // or pcm_8000 / pcm_16000 for WAV (phone systems)
     ],
 ]; 

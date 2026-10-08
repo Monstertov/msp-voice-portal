@@ -30,7 +30,7 @@ A secure, mobile-friendly web portal for IT Managed Service Providers to collect
 - Easy branding via config: title, logo, every colour (portal and admin page), and which input method opens first
 - Optional admin page (`/admin/`) to review, play, download and delete submissions
 - Optional read-only REST API layer for integrations, with admin-managed keys and contact access per key
-- Optional ElevenLabs AI voice: text to speech, transcription and voice swap, with Dutch and English voices, a searchable voice library, and MP3 or phone-ready WAV output
+- Optional ElevenLabs AI voice: text to speech for text submissions, with Dutch and English voices, a searchable voice library, and MP3 or phone-ready WAV output
 
 ## Installation
 
@@ -48,7 +48,7 @@ See [INSTALL.md](INSTALL.md) for full setup instructions.
 Both are optional and off by default: the portal works on its own, emailing every submission as before.
 
 - **Admin page** (`'admin' => ['enabled' => true]` in `config.php`): open `<portal url>/admin/` and sign in with a user from `config.php`. Every submission is listed with its details and recording, kept for 30 days by default. Each notification email links straight to the submission there.
-- **ElevenLabs AI voice** (`'elevenlabs' => ['enabled' => true]`, needs the admin page): per submission, one click for **Generate AI voice** (text to speech), **Transcribe** (recording to editable text) or **Voice swap** (same words, AI voice). The **AI settings** page holds the API key (shown as `sk_ab12…wxyz` so you can see which key is active), a default voice per language (Dutch, English), models, voice tuning, output format (MP3, or WAV 8/16 kHz for phone systems), credit usage, and a searchable ElevenLabs voice library with previews.
+- **ElevenLabs AI voice** (`'elevenlabs' => ['enabled' => true]`, needs the admin page): text submissions get **Generate AI voice** (text to speech); recordings and uploads are already audio and get a **Download audio** button. The **AI settings** page holds the API key (shown as `sk_ab12…wxyz` so you can see which key is active), a default voice per language (Dutch, English), models, voice tuning, output format (MP3, or WAV 8/16 kHz for phone systems), credit usage, and a searchable ElevenLabs voice library with previews.
 
 Setup: [INSTALL.md](INSTALL.md#9-admin-page--ai-voice-optional).
 

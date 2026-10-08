@@ -302,9 +302,8 @@ Set your brand colour in `config.php`:
 
 The admin page lives at `<your portal url>/admin/` (for example `https://example.com/portal/admin/`). Admins can see recent submissions, play and download them, and turn them into a professional AI voice with [ElevenLabs](https://elevenlabs.io):
 
-- **Generate AI voice**: reads text aloud (a typed submission, a transcript, or anything you type).
-- **Transcribe**: turns a recording into editable text, which you can then generate as AI voice.
-- **Voice swap**: keeps the caller's words and timing but replaces their voice.
+- **Text submissions**: **Generate AI voice** reads the text aloud (edit it first if you like) in the voice you pick.
+- **Recordings and uploads**: already audio, so they get a **Download audio** button and no AI voice.
 
 Submissions are kept in `data/` for `admin.retention_days` (default 30) and are deleted automatically after that.
 

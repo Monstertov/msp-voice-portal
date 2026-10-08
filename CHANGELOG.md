@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.12.0-beta] - 2026-10-08
+
+### Changed
+- AI voice on the admin page is for text submissions only. Recordings and uploads are already audio: they get a **Download audio** button instead of AI voice options
+
+### Removed
+- Transcribe and Voice swap, with their model settings (`sts_model`, `stt_model`). Existing settings with these keys are ignored
+
 ## [0.11.0-beta] - 2026-10-08
 
 ### Added

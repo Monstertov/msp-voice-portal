@@ -17,13 +17,10 @@ $formats = [
     'pcm_8000'      => 'WAV 8 kHz mono (classic phone systems)',
     'pcm_16000'     => 'WAV 16 kHz mono (HD voice)',
 ];
-$sttModels = ['scribe_v1' => 'Scribe v1'];
 $defaults = [
     'api_key' => '',
     'voices' => ['nl' => '', 'en' => 'EXAVITQu4vr4xnSDxMaL'],
     'tts_model' => 'eleven_multilingual_v2',
-    'sts_model' => 'eleven_multilingual_sts_v2',
-    'stt_model' => 'scribe_v1',
     'output_format' => 'mp3_44100_128',
     'stability' => 0.5,
     'similarity_boost' => 0.75,
@@ -217,9 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$apiAction) {
             $v = $_POST['voices'][$code] ?? '';
             $new['voices'][$code] = valid_voice($v) ? $v : '';
         }
-        foreach (['tts_model', 'sts_model', 'stt_model'] as $f) {
-            if (preg_match('/^[a-z0-9_]{3,60}$/', (string) ($_POST[$f] ?? ''))) $new[$f] = $_POST[$f];
-        }
+        if (preg_match('/^[a-z0-9_]{3,60}$/', (string) ($_POST['tts_model'] ?? ''))) $new['tts_model'] = $_POST['tts_model'];
         if (isset($formats[str($_POST['output_format'] ?? '')])) $new['output_format'] = $_POST['output_format'];
         foreach (['stability' => [0, 1], 'similarity_boost' => [0, 1], 'style' => [0, 1], 'speed' => [0.7, 1.2]] as $f => [$lo, $hi]) {
             if (is_numeric($_POST[$f] ?? null)) $new[$f] = max($lo, min($hi, round((float) $_POST[$f], 2)));
@@ -257,7 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$apiAction) {
     if (!valid_id($id) || !is_file($metaFile)) back();
     $meta = json_decode(file_get_contents($metaFile), true);
     $voice = valid_voice($_POST['voice'] ?? null) ? $_POST['voice'] : (($el['voices'][$meta['lang'] ?? ''] ?? '') ?: $el['voices']['en']);
-    $original = !empty($meta['audio']) ? $dataDir . $id . '/' . $meta['audio'] : null;
     $out = $dataDir . $id . '/ai-' . date('Ymd-His');
 
     try {
@@ -267,28 +261,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$apiAction) {
             flash('Submission deleted.');
             back();
         }
+        // AI voice is for text submissions only; a recording or upload is already audio
+        if (!empty($meta['audio'])) throw new RuntimeException('This submission is already audio. Download it instead.');
         if ($el['api_key'] === '') throw new RuntimeException('No ElevenLabs API key yet. Add one under AI settings.');
         if ($action === 'tts') {
             $text = trim((string) ($_POST['text'] ?? ''));
-            if ($text === '') throw new RuntimeException('Type or transcribe some text first.');
+            if ($text === '') throw new RuntimeException('Type some text first.');
             if (mb_strlen($text) > 5000) throw new RuntimeException('Text is longer than 5000 characters.');
             save_audio($el, "$out-tts", tts($el, $voice, $text));
             flash('AI voice ready.');
-        } elseif ($action === 'swap' && $original) {
-            $audio = elevenlabs($el, "/v1/speech-to-speech/$voice?output_format=" . urlencode($el['output_format']), [
-                'audio' => new CURLFile($original),
-                'model_id' => $el['sts_model'],
-                'voice_settings' => json_encode(voice_settings($el)),
-            ], true);
-            save_audio($el, "$out-swap", $audio);
-            flash('Voice swap ready.');
-        } elseif ($action === 'transcribe' && $original) {
-            $fields = ['file' => new CURLFile($original), 'model_id' => $el['stt_model']];
-            if (isset($languages[$meta['lang'] ?? ''])) $fields['language_code'] = $meta['lang'];
-            $res = json_decode(elevenlabs($el, '/v1/speech-to-text', $fields, true), true);
-            $meta['transcript'] = trim($res['text'] ?? '');
-            file_put_contents($metaFile, json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            flash('Transcribed. Check the text, then click Generate AI voice.');
         }
     } catch (Throwable $e) {
         flash($e->getMessage(), false);
@@ -583,21 +564,9 @@ function model_options($models, $cap, $selected) {
 
             <h2 class="h5 mt-3 mb-3">Models</h2>
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label" for="tts_model">Text to speech</label>
                     <select class="form-select" id="tts_model" name="tts_model"><?= model_options($models, 'can_do_text_to_speech', $el['tts_model']) ?></select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label" for="sts_model">Voice swap</label>
-                    <select class="form-select" id="sts_model" name="sts_model"><?= model_options($models, 'can_do_voice_conversion', $el['sts_model']) ?></select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label" for="stt_model">Transcribe</label>
-                    <select class="form-select" id="stt_model" name="stt_model">
-                        <?php foreach ($sttModels + [$el['stt_model'] => $el['stt_model']] as $id => $name): ?>
-                            <option value="<?= h($id) ?>" <?= $id === $el['stt_model'] ? 'selected' : '' ?>><?= h($name) ?></option>
-                        <?php endforeach; ?>
-                    </select>
                 </div>
             </div>
             <p class="small text-secondary mt-2">Dutch needs a multilingual model. Multilingual v2 sounds best; Flash and Turbo are faster and use half the credits.</p>
@@ -730,7 +699,7 @@ function model_options($models, $cap, $selected) {
         $id = basename(dirname($mf));
         $aiFiles = array_filter(glob(dirname($mf) . '/ai-*') ?: [], function ($f) { return preg_match('/\.(mp3|wav)$/', $f); });
         rsort($aiFiles);
-        $text = plain($m['transcript'] ?? $m['textContent'] ?? '');
+        $text = plain($m['textContent'] ?? '');
         $lang = $m['lang'] ?? '';
         $voice = ($el['voices'][$lang] ?? '') ?: $el['voices']['en'];
     ?>
@@ -754,7 +723,8 @@ function model_options($models, $cap, $selected) {
             <?php if (!empty($m['audio'])): ?>
                 <div class="mb-3">
                     <div class="small text-secondary">Original recording</div>
-                    <audio controls preload="none" class="w-100" src="?file=<?= h("$id/{$m['audio']}") ?>"></audio>
+                    <audio controls preload="none" class="w-100 mb-2" src="?file=<?= h("$id/{$m['audio']}") ?>"></audio>
+                    <a class="btn btn-sm btn-primary" href="?file=<?= h("$id/{$m['audio']}") ?>&amp;download=1">Download audio</a>
                 </div>
             <?php endif; ?>
 
@@ -771,20 +741,16 @@ function model_options($models, $cap, $selected) {
             <form method="post" class="mt-3">
                 <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
                 <input type="hidden" name="id" value="<?= h($id) ?>">
-                <?php if ($aiOn): ?>
-                <textarea class="form-control mb-2" name="text" rows="3"
-                    placeholder="<?= !empty($m['audio']) ? 'Click Transcribe to fill this from the recording, or type the text' : 'Text to speak' ?>"><?= h($text) ?></textarea>
+                <?php $aiHere = $aiOn && empty($m['audio']); ?>
+                <?php if ($aiHere): ?>
+                <textarea class="form-control mb-2" name="text" rows="3" placeholder="Text to speak"><?= h($text) ?></textarea>
                 <?php endif; ?>
                 <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <?php if ($aiOn): ?>
+                    <?php if ($aiHere): ?>
                     <select class="form-select form-select-sm w-auto" name="voice" aria-label="Voice">
                         <?= voice_options($voices, $voice, $lang) ?>
                     </select>
                     <button class="btn btn-sm btn-primary" name="action" value="tts">Generate AI voice</button>
-                    <?php if (!empty($m['audio'])): ?>
-                        <button class="btn btn-sm btn-outline-light" name="action" value="transcribe">Transcribe</button>
-                        <button class="btn btn-sm btn-outline-light" name="action" value="swap">Voice swap</button>
-                    <?php endif; ?>
                     <?php endif; ?>
                     <button class="btn btn-sm btn-outline-danger ms-auto" name="action" value="delete">Delete</button>
                 </div>
