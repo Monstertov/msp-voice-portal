@@ -130,7 +130,7 @@ chown yourusername:yourusername uploads logs data
 
 ## 5. Set Up .htaccess Files
 
-The `.htaccess` files are **not included in the repository** (they are gitignored because they contain server-specific configuration). You must create them manually.
+Create the root and uploads `.htaccess` files below for your server. The repository includes `data/.htaccess`, `admin/.htaccess` and `api/.htaccess`; keep these when uploading or updating the portal.
 
 ### Project root — `/.htaccess`
 
@@ -159,6 +159,7 @@ RewriteRule ^(theme\.php|LICENSE)$ - [F,L]
 RewriteRule \.php/ - [F,L]
 RewriteRule ^\.htaccess$ - [F,L]
 RewriteRule ^test\.php$ - [F,L]
+RewriteRule ^tests/ - [F,L]
 RewriteRule ^reset\.php$ - [F,L]
 
 # --- Redirect HTTP to HTTPS ---
@@ -346,6 +347,79 @@ Settings saved there go to `data/settings.json`, so updating the portal never ov
 2. Try recording a short audio clip and submitting the form
 3. Confirm the submission email arrives
 4. Open browser devtools (F12 → Console) — there should be no CSP errors or JS errors
+
+---
+
+## 11. REST API (optional)
+
+A read-only REST API layer for integrations is available under `<portal url>/api/v1/`. It is **off by default**. Keeping an old `config.php` without an `api` block leaves the API disabled (404) and the portal working as before.
+
+**1. Enable the admin page** as described above, then add this block to `config.php`:
+
+```php
+'api' => [
+    'enabled' => true,
+    'key_requests' => 60,
+    'ip_requests' => 120,
+    'time_window' => 60, // seconds
+],
+```
+
+The API reads the same stored submissions as the admin page; it does not change how submissions are emailed or retained. With the admin page off, new submissions are not stored. It does not generate voices, transcribe, edit or delete submissions.
+
+**2. Open admin → API keys**, enter a name, and choose whether to allow the `contact` scope. This scope is **off by default** and allows contact email and phone in list and detail responses. Copy the key immediately: it is shown only in the creation response and cannot be recovered later. The page lists created and last-used dates and has a Revoke button. To change a scope or replace a lost key, create a new key and revoke the old one.
+
+Only HMAC-SHA256 hashes and a server-side pepper are stored in `data/api-keys.json`. Key use is recorded in `data/api-use.log` with timestamp and key id only. Keep `data/` blocked from the web, including a custom `storage_dir`; protect backups of this directory as well. The existing submission retention setting does not remove API keys or this log; rotate the log as needed.
+
+**3. Use HTTPS**, recommended for every API request so Bearer keys and submission contents are encrypted in transit. Send the key in the Authorization header, never in the URL. No CORS headers are enabled by default. Rate limits apply independently per key and per connecting IP (`REMOTE_ADDR`, without trusting forwarded headers), including failed authentication in the IP limit. Behind a proxy, clients may share an IP limit unless the web server is configured to restore the client address. Limits use locked temporary files, as with the portal's file-backed throttling; use one server/shared temporary storage when running multiple PHP workers or hosts.
+
+Example calls (replace the URL and ids; `read` keeps the key out of shell history):
+
+```bash
+read -r -s -p 'API key: ' MSP_API_KEY
+curl -H "Authorization: Bearer $MSP_API_KEY" 'https://example.com/portal/api/v1/submissions?limit=20&offset=0'
+curl -H "Authorization: Bearer $MSP_API_KEY" 'https://example.com/portal/api/v1/submissions?since=2026-10-08T00%3A00%3A00Z'
+curl -H "Authorization: Bearer $MSP_API_KEY" 'https://example.com/portal/api/v1/submissions/20261008-120000-abcdef01'
+curl -H "Authorization: Bearer $MSP_API_KEY" -o original.wav 'https://example.com/portal/api/v1/submissions/20261008-120000-abcdef01/recording'
+curl -H "Authorization: Bearer $MSP_API_KEY" 'https://example.com/portal/api/v1/submissions/20261008-120000-abcdef01/audio'
+curl -H "Authorization: Bearer $MSP_API_KEY" -o voice.mp3 'https://example.com/portal/api/v1/submissions/20261008-120000-abcdef01/audio/ai-20261008-120100-tts.mp3'
+unset MSP_API_KEY
+```
+
+All endpoints use **GET**:
+
+| Endpoint (under `/api/v1/`) | Response |
+|---|---|
+| `submissions` | `{ "submissions": [...], "next_offset": 20 }` (or null on the last page) |
+| `submissions/<id>` | Submission details |
+| `submissions/<id>/recording` | Original recording download (404 for text-only submissions) |
+| `submissions/<id>/audio` | `{ "files": [{ "name": "ai-...mp3", "size": 1234 }] }` |
+| `submissions/<id>/audio/<filename>` | Generated MP3 or WAV download |
+
+Lists are newest first. `limit` defaults to 50 (1–100); `offset` defaults to 0. `since` accepts Unix seconds or an ISO 8601 timestamp with seconds and a timezone (URL-encode a `+` offset), and includes submissions created strictly after it. Keep `since` and `limit` the same while following `next_offset`; offsets can shift when new submissions arrive or retention removes old ones.
+
+List entries and details contain `id`, `created`, `severity`, `language`, `input_type`, `company_name`, `notes`, `text` and `transcript` (null when absent). `contact_email` and `contact_phone` are omitted without the contact scope. Files are served with fixed audio types, `nosniff` and attachment disposition. Errors are JSON: 400 for invalid filters, 401 for authentication failure, 404 for missing resources or disabled API, 405 for other methods, 429 for a rate limit (`Retry-After` seconds), and 503 for unavailable storage.
+
+**4. Web server rules.** Apache: keep `api/.htaccess`, enable `mod_rewrite` and `mod_headers`, and allow overrides as above. It routes `/api/v1/...` to `api/index.php`, forwards Authorization and blocks direct access to the helper. The root `data/` deny rule must remain in place.
+
+For nginx, add these locations to the server block (adjust the PHP socket). They take precedence over the generic PHP handler. For a subfolder install, replace `/api/`, `/data/` and `/tests/` with `/portal/api/`, `/portal/data/` and `/portal/tests/`, and use `/portal/api/index.php` for the script parameters:
+
+```nginx
+location ^~ /data/ { deny all; }
+location ^~ /tests/ { deny all; }
+location ^~ /api/ {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
+    fastcgi_param SCRIPT_NAME /api/index.php;
+    fastcgi_param HTTP_AUTHORIZATION $http_authorization;
+    fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+    add_header Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; sandbox" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Cache-Control no-store always;
+}
+```
+
+Verify that `/data/api-keys.json` is denied, an unauthenticated `/api/v1/submissions` returns JSON 401 when enabled, and a valid key returns JSON 200. Avoid web server logging of Authorization headers. Run the standalone checks on the server with `php tests/api_test.php`; they use temporary fixtures and no network.
 
 ---
 

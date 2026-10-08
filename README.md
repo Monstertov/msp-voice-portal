@@ -29,6 +29,7 @@ A secure, mobile-friendly web portal for IT Managed Service Providers to collect
 - CSRF protection, rate limiting, and secure file validation
 - Easy branding via config: title, logo, every colour (portal and admin page), and which input method opens first
 - Optional admin page (`/admin/`) to review, play, download and delete submissions
+- Optional read-only REST API layer for integrations, with admin-managed keys and contact access per key
 - Optional ElevenLabs AI voice: text to speech, transcription and voice swap, with Dutch and English voices, a searchable voice library, and MP3 or phone-ready WAV output
 
 ## Installation
@@ -50,6 +51,14 @@ Both are optional and off by default: the portal works on its own, emailing ever
 - **ElevenLabs AI voice** (`'elevenlabs' => ['enabled' => true]`, needs the admin page): per submission, one click for **Generate AI voice** (text to speech), **Transcribe** (recording to editable text) or **Voice swap** (same words, AI voice). The **AI settings** page holds the API key (shown as `sk_ab12…wxyz` so you can see which key is active), a default voice per language (Dutch, English), models, voice tuning, output format (MP3, or WAV 8/16 kHz for phone systems), credit usage, and a searchable ElevenLabs voice library with previews.
 
 Setup: [INSTALL.md](INSTALL.md#9-admin-page--ai-voice-optional).
+
+## API
+
+An optional REST API layer for integrations lives at `/api/v1/`. It lists stored submissions, reads their details, and downloads original recordings and generated AI voice files. It is off by default; an existing config without an `api` block keeps it disabled.
+
+Enable `api.enabled` and the admin page in `config.php`, then create a key on the admin **API keys** page. Copy it when it is shown: only a hash is stored. Requests use `Authorization: Bearer <key>`. Contact email and phone are included only when the key has the **contact** scope, off by default. Keys can be revoked there too.
+
+Setup and examples: [INSTALL.md](INSTALL.md#11-rest-api-optional).
 
 ## Contributing
 

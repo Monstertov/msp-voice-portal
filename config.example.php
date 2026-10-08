@@ -142,6 +142,16 @@ return [
         // 'url' => 'https://example.com/portal/admin/',
     ],
 
+    // A REST API layer for integrations (/api/v1/). Off or missing: returns 404.
+    // Enable the admin page too: it stores submissions and has the API keys page.
+    // Keys are shown once; hashes are kept in data/api-keys.json. Contact scope is off by default.
+    'api' => [
+        'enabled' => false,
+        'key_requests' => 60, // requests per key per time window
+        'ip_requests' => 120, // requests per IP, including failed authentication
+        'time_window' => 60,  // seconds; limits are independent of portal submission limits
+    ],
+
     // Where submissions and AI voice files are kept. Must not be reachable from the web
     // (data/.htaccess blocks it on Apache; see INSTALL.md for nginx).
     'storage_dir' => __DIR__ . '/data/',

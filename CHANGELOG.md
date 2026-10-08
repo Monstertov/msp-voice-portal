@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0-beta] - 2026-10-08
+
+### Added
+- Optional read-only REST API layer for integrations at `/api/v1/`: list and read stored submissions, download original recordings, and list and download generated AI voice files
+- Admin API keys page: named keys, created and last-used dates, revocation, and optional contact scope for contact email and phone. Keys are shown once; only hashes are stored in `data/`
+- API configuration, off by default and disabled when missing from an existing config, with independent per-key and per-IP rate limits
+- Standalone API tests: `php tests/api_test.php` (no network)
+
+### Security
+- Bearer authentication with constant-time hash comparison, generic authentication errors, CSRF-protected key administration, and use logging by key id only
+- Downloads use validated ids and filenames, resolved paths inside storage, fixed content types and `nosniff`; API responses have strict headers and no CORS by default
+- Apache API rules and nginx setup instructions
+
 ## [0.10.0-beta] - 2026-09-27
 
 ### Added

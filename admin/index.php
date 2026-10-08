@@ -48,6 +48,9 @@ if (empty($config['admin']['enabled']) || !$users) {
     exit('Not found');
 }
 $aiOn = !empty($config['elevenlabs']['enabled']);
+$apiOn = !empty($config['api']['enabled']);
+if ($apiOn) require dirname(__DIR__) . '/api/lib.php';
+$createdApiKey = null;
 
 session_name('msp_admin');
 session_start(['cookie_httponly' => true, 'cookie_secure' => true, 'cookie_samesite' => 'Strict']);
@@ -123,8 +126,31 @@ function tts($el, $voice, $text) {
         ['text' => $text, 'model_id' => $el['tts_model'], 'voice_settings' => voice_settings($el)]);
 }
 
+// API key actions use the same admin session and CSRF token. Creation renders the key in
+// this response only: the plaintext key is never saved in the session.
+$apiAction = $apiOn && $_SERVER['REQUEST_METHOD'] === 'POST'
+    && in_array($_POST['action'] ?? '', ['api_create', 'api_revoke'], true);
+if ($apiAction) {
+    if (!hash_equals($csrf, str($_POST['csrf'] ?? ''))) {
+        http_response_code(400);
+        exit('Session expired, go back and reload the page.');
+    }
+    if (empty($_SESSION['admin'])) back();
+    try {
+        if ($_POST['action'] === 'api_create') {
+            $createdApiKey = api_create_key($config, str($_POST['name'] ?? ''), !empty($_POST['contact']));
+        } else {
+            api_revoke_key($config, str($_POST['key_id'] ?? ''));
+            flash('API key revoked.');
+        }
+    } catch (Throwable $e) {
+        flash($e->getMessage(), false);
+    }
+    if ($_POST['action'] === 'api_revoke') back('?page=api');
+}
+
 // ---- POST actions ----
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$apiAction) {
     if (!hash_equals($csrf, (string) ($_POST['csrf'] ?? ''))) {
         http_response_code(400);
         exit('Session expired, go back and reload the page.');
@@ -321,6 +347,15 @@ $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 $title = ($config['application_title'] ?? 'MSP Voice Portal') . ' admin';
 $page = $aiOn && ($_GET['page'] ?? '') === 'settings' ? 'settings' : 'submissions';
+if ($apiOn && (($_GET['page'] ?? '') === 'api' || ($_POST['action'] ?? '') === 'api_create')) $page = 'api';
+$apiKeys = [];
+if ($page === 'api' && !empty($_SESSION['admin'])) {
+    try {
+        $apiKeys = api_keys($config, function (&$data) { return $data['keys'] ?? []; });
+    } catch (Throwable $e) {
+        $flash = [$e->getMessage(), false];
+    }
+}
 
 // Voices and models from the account, fetched once per session
 if ($aiOn && !empty($_SESSION['admin']) && $el['api_key'] !== '' && !isset($_SESSION['voices'])) {
@@ -439,6 +474,9 @@ function model_options($models, $cap, $selected) {
             <?php if ($aiOn): ?>
                 <a class="btn btn-sm <?= $page === 'settings' ? 'btn-primary' : 'btn-outline-secondary' ?>" href="?page=settings">AI settings</a>
             <?php endif; ?>
+            <?php if ($apiOn): ?>
+                <a class="btn btn-sm <?= $page === 'api' ? 'btn-primary' : 'btn-outline-secondary' ?>" href="?page=api">API keys</a>
+            <?php endif; ?>
             <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
             <button class="btn btn-sm btn-outline-secondary" name="action" value="logout">Sign out (<?= h($_SESSION['admin']) ?>)</button>
         </form>
@@ -451,7 +489,42 @@ function model_options($models, $cap, $selected) {
         <div class="alert alert-warning">No ElevenLabs API key yet. Add one under <a href="?page=settings">AI settings</a>.</div>
     <?php endif; ?>
 
-<?php if ($page === 'settings'):
+<?php if ($page === 'api'): ?>
+    <div class="card shadow mb-4"><div class="card-body p-4">
+        <h2 class="h5">API keys</h2>
+        <p class="text-secondary">Read-only access to stored submissions and audio. Contact details are off by default.</p>
+        <?php if ($createdApiKey !== null): ?>
+            <div class="alert alert-success">Copy this key now. It is shown only in this response.<br>
+                <code class="text-break"><?= h($createdApiKey) ?></code>
+            </div>
+        <?php endif; ?>
+        <form method="post" action="?page=api">
+            <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
+            <label class="form-label" for="key-name">Name</label>
+            <input class="form-control mb-3" id="key-name" name="name" maxlength="100" required>
+            <label class="form-check mb-3"><input class="form-check-input" type="checkbox" name="contact" value="1">
+                <span class="form-check-label">Allow contact email and phone (contact scope)</span></label>
+            <button class="btn btn-primary" name="action" value="api_create">Create key</button>
+        </form>
+    </div></div>
+    <?php foreach ($apiKeys as $keyId => $key): ?>
+        <div class="card mb-3"><div class="card-body">
+            <h3 class="h6"><?= h($key['name']) ?></h3>
+            <p class="small text-secondary">Created: <?= h($key['created']) ?><br>
+                Last used: <?= h($key['last_used'] ?? 'Never') ?><br>
+                Contact: <?= in_array('contact', $key['scopes'] ?? [], true) ? 'Allowed' : 'Off' ?></p>
+            <?php if (!empty($key['revoked'])): ?>
+                <span class="text-secondary">Revoked: <?= h($key['revoked']) ?></span>
+            <?php else: ?>
+                <form method="post" action="?page=api">
+                    <input type="hidden" name="csrf" value="<?= h($csrf) ?>">
+                    <input type="hidden" name="key_id" value="<?= h($keyId) ?>">
+                    <button class="btn btn-sm btn-outline-danger" name="action" value="api_revoke">Revoke</button>
+                </form>
+            <?php endif; ?>
+        </div></div>
+    <?php endforeach; ?>
+<?php elseif ($page === 'settings'):
     $keySource = isset($saved['api_key']) ? 'saved on this page' : (!empty($config['elevenlabs']['api_key']) ? 'from config.php' : '');
     $usage = null;
     if ($el['api_key'] !== '') {

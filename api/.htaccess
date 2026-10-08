@@ -1,0 +1,14 @@
+Options -Indexes -MultiViews
+RewriteEngine On
+# Forward Bearer authentication to PHP, including CGI/FastCGI installs.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+<Files "lib.php">
+    Require all denied
+</Files>
+RewriteRule ^v1(?:/.*)?$ index.php [END]
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; sandbox"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Cache-Control "no-store"
+</IfModule>

@@ -8,6 +8,7 @@ uploads/
 data/*
 !data/.htaccess
 !admin/.htaccess
+!api/.htaccess
 
 # Ignore vendor directory
 vendor/
@@ -34,7 +35,9 @@ Thumbs.db
 logs/
 reset.php
 test.php
-tests/
+tests/*
+!tests/api_test.php
+!tests/.htaccess
 phpunit.xml
 development.md
 config.php
